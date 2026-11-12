@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* 1. Variáveis: a identidade visual da Etapa 1 fica toda aqui */
+:root {
+  --fundo: #121214;
+  --superficie: #1E1E24;
+  --borda: #2A2A32;
+  --vermelho: #E50914;
+  --vermelho-escuro: #B80710;
+  --texto: #FFFFFF;
+  --texto-suave: #A1A1AA;
+  --verde: #22C55E;
+}
+
+/* 2. Base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column; /* empurra o rodapé para o fim da tela */
+}
+
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* 3. Cabeçalho e menu */
+.site-header {
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+  position: sticky;
+  top: 0;
+  z-index: 10; /* fica por cima dos cards ao rolar */
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.logo { font-size: 1.5rem; font-weight: 700; }
+.logo span { color: var(--vermelho); }
+
+.main-nav { display: flex; gap: 1.5rem; list-style: none; }
+.nav-link { color: var(--texto-suave); font-weight: 600; }
+.nav-link:hover, .nav-link.active { color: var(--vermelho); }
+
+/* 4. Botões */
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 4px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--vermelho);
+  color: var(--texto);
+  transition: background 0.2s, transform 0.2s;
+}
+.btn:hover { background: var(--vermelho-escuro); transform: translateY(-2px); }
+.btn:disabled { opacity: 0.5; cursor: wait; }
+.btn-secundario { background: var(--borda); }
+.btn-secundario:hover { background: var(--texto-suave); }
+
+/* 5. Destaque (hero) e títulos */
+.hero {
+  background: linear-gradient(135deg, var(--vermelho-escuro), var(--fundo) 70%);
+  padding: 5rem 0;
+}
+.hero h1 { font-size: 2.5rem; line-height: 1.2; margin-bottom: 1rem; }
+.hero p { color: var(--texto-suave); max-width: 600px; margin-bottom: 1.5rem; }
+
+.section-title {
+  font-size: 1.75rem;
+  margin: 3rem 0 1.5rem;
+  border-left: 4px solid var(--vermelho);
+  padding-left: 0.75rem;
+}
+
+/* 6. Grade de cards de filme */
+.movies-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.movie-card {
+  background: var(--superficie);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+}
+.movie-card:hover { transform: translateY(-5px); }
+.movie-card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
+.movie-info { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; }
+.movie-card h3 { font-size: 1.1rem; }
+.movie-meta { color: var(--texto-suave); font-size: 0.875rem; }
+.card-acoes { display: flex; gap: 0.5rem; margin-top: auto; }
+
+/* 7. Formulário */
+.form-filme {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+.form-filme label { display: flex; flex-direction: column; gap: 0.3rem; font-weight: 600; }
+
+input, select, textarea {
+  background: var(--fundo);
+  color: var(--texto);
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  padding: 0.6rem;
+  font: inherit;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--vermelho); }
+.campo-erro { border-color: var(--vermelho); }
+.erro-texto { color: var(--vermelho); font-size: 0.85rem; font-weight: 400; }
+
+.busca { width: 100%; margin-bottom: 1.5rem; }
+
+/* 8. Mensagens de estado: carregando, vazio, erro e sucesso */
+.mensagem { padding: 1rem; border-radius: 8px; background: var(--superficie); color: var(--texto-suave); }
+.mensagem.erro { border-left: 4px solid var(--vermelho); color: var(--texto); }
+.mensagem.sucesso { border-left: 4px solid var(--verde); color: var(--texto); }
+.escondido { display: none; }
+
+/* 9. Rodapé */
+.site-footer {
+  margin-top: auto;
+  background: var(--superficie);
+  border-top: 1px solid var(--borda);
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+}
+
+/* 10. Responsividade (mobile first: começa com 1 coluna) */
+@media (min-width: 600px) {
+  .movies-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 900px) {
+  .hero h1 { font-size: 3.5rem; }
+  .movies-grid { grid-template-columns: repeat(4, 1fr); }
+}
