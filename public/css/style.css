@@ -2,17 +2,17 @@
 
 /* ========== 1. VARIÁVEIS — identidade visual da Etapa 1 ========== */
 :root {
-  --fundo: #121214;
-  --superficie: #1E1E24;
-  --borda: #2A2A32;
-  --vermelho: #E50914;
-  --vermelho-escuro: #B80710;
-  --verde: #22C55E;
-  --texto: #FFFFFF;
-  --texto-suave: #A1A1AA;
-  --raio-botao: 4px;
-  --raio-card: 8px;
-  --transicao: 0.2s ease;
+  --bg: #121214;
+  --surface: #1E1E24;
+  --border: #2A2A32;
+  --red: #E50914;
+  --red-dark: #B80710;
+  --green: #22C55E;
+  --text: #FFFFFF;
+  --text-muted: #A1A1AA;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --transition: 0.2s ease;
 }
 
 /* ========== 2. BASE ========== */
@@ -26,8 +26,8 @@ body {
   display: flex;
   flex-direction: column; /* empurra o rodapé para o fim da tela */
   min-height: 100vh;
-  background: var(--fundo);
-  color: var(--texto);
+  background: var(--bg);
+  color: var(--text);
   font-family: 'Inter', system-ui, sans-serif;
   line-height: 1.6;
 }
@@ -44,17 +44,17 @@ a {
 
 /* Links dentro de textos: sublinhados e com cor de visitado */
 main p a {
-  color: var(--vermelho);
+  color: var(--red);
   text-decoration: underline;
 }
 
 main p a:visited {
-  color: var(--vermelho-escuro);
+  color: var(--red-dark);
 }
 
 /* Foco visível para quem navega pelo teclado */
 :focus-visible {
-  outline: 2px solid var(--vermelho);
+  outline: 2px solid var(--red);
   outline-offset: 2px;
 }
 
@@ -65,20 +65,20 @@ main p a:visited {
   padding: 0 1.5rem;
 }
 
-.escondido {
+.hidden {
   display: none;
 }
 
 /* ========== 3. CABEÇALHO E MENU (Flexbox) ========== */
-.cabecalho {
+.site-header {
   position: sticky;
   top: 0;
   z-index: 10; /* fica por cima dos cards ao rolar */
-  background: var(--superficie);
-  border-bottom: 1px solid var(--borda);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
 
-.menu {
+.nav {
   display: flex;
   flex-wrap: wrap; /* no celular, os links descem para a linha de baixo */
   justify-content: space-between;
@@ -94,67 +94,67 @@ main p a:visited {
 }
 
 .logo span {
-  color: var(--vermelho);
+  color: var(--red);
 }
 
-.menu-links {
+.nav-links {
   display: flex;
   gap: 1.5rem;
   list-style: none;
 }
 
-.menu-link {
-  color: var(--texto-suave);
+.nav-link {
+  color: var(--text-muted);
   font-weight: 600;
-  transition: color var(--transicao);
+  transition: color var(--transition);
 }
 
-.menu-link:hover,
-.menu-link.ativo {
-  color: var(--vermelho);
+.nav-link:hover,
+.nav-link.active {
+  color: var(--red);
 }
 
 /* ========== 4. BOTÕES ========== */
-.botao {
+.button {
   display: inline-block;
   padding: 0.6rem 1.2rem;
   border: none;
-  border-radius: var(--raio-botao);
-  background: var(--vermelho);
-  color: var(--texto);
+  border-radius: var(--radius-sm);
+  background: var(--red);
+  color: var(--text);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--transicao), transform var(--transicao);
+  transition: background var(--transition), transform var(--transition);
 }
 
-.botao:hover {
-  background: var(--vermelho-escuro);
+.button:hover {
+  background: var(--red-dark);
   transform: translateY(-2px);
 }
 
-.botao:active {
+.button:active {
   transform: scale(0.97); /* "afunda" no clique */
 }
 
-.botao:disabled {
+.button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
 
-.botao-secundario {
-  background: var(--borda);
+.button-secondary {
+  background: var(--border);
 }
 
-.botao-secundario:hover {
-  background: var(--texto-suave);
+.button-secondary:hover {
+  background: var(--text-muted);
 }
 
 /* ========== 5. BANNER E TÍTULOS ========== */
 .banner {
   padding: 5rem 0;
-  background: linear-gradient(135deg, var(--vermelho-escuro), var(--fundo) 70%);
+  background: linear-gradient(135deg, var(--red-dark), var(--bg) 70%);
 }
 
 .banner h1 {
@@ -166,24 +166,24 @@ main p a:visited {
 .banner p {
   max-width: 600px;
   margin-bottom: 1.5rem;
-  color: var(--texto-suave);
+  color: var(--text-muted);
 }
 
-.titulo-secao {
+.section-title {
   margin: 3rem 0 1.5rem;
   padding-left: 0.75rem;
-  border-left: 4px solid var(--vermelho);
+  border-left: 4px solid var(--red);
   font-size: 1.75rem;
 }
 
-.texto {
+.text {
   max-width: 70ch;
   margin-bottom: 1rem;
-  color: var(--texto-suave);
+  color: var(--text-muted);
 }
 
 /* ========== 6. GRADE E CARDS (Grid + Flexbox) ========== */
-.grade {
+.grid {
   display: grid;
   grid-template-columns: 1fr; /* celular: uma coluna */
   gap: 1.5rem;
@@ -194,9 +194,9 @@ main p a:visited {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--superficie);
-  border-radius: var(--raio-card);
-  transition: transform var(--transicao);
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  transition: transform var(--transition);
 }
 
 .card:hover {
@@ -209,7 +209,7 @@ main p a:visited {
   object-fit: cover;
 }
 
-.card-info {
+.card-body {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -217,30 +217,30 @@ main p a:visited {
   padding: 1rem;
 }
 
-.card-detalhe {
-  color: var(--texto-suave);
+.card-meta {
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
-.card-acoes {
+.card-actions {
   display: flex;
   gap: 0.5rem;
   margin-top: auto; /* botões sempre no rodapé do card */
 }
 
 /* ========== 7. FORMULÁRIOS ========== */
-.formulario {
+.form {
   display: grid;
   gap: 1rem;
   max-width: 640px;
   padding: 1.5rem;
-  background: var(--superficie);
-  border: 1px solid var(--borda);
-  border-radius: var(--raio-card);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
 }
 
 /* Cada campo: rótulo em cima, controle embaixo */
-.campo {
+.field {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
@@ -251,12 +251,12 @@ input,
 select,
 textarea {
   padding: 0.6rem;
-  background: var(--fundo);
-  color: var(--texto);
-  border: 1px solid var(--borda);
-  border-radius: var(--raio-botao);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   font: inherit;
-  transition: border-color var(--transicao);
+  transition: border-color var(--transition);
 }
 
 textarea {
@@ -267,25 +267,25 @@ textarea {
 input:user-invalid,
 select:user-invalid,
 textarea:user-invalid {
-  border-color: var(--vermelho);
+  border-color: var(--red);
 }
 
 /* Grupo de opções (radio e checkbox) */
-.opcoes {
+.options {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1rem;
   padding: 0.75rem;
-  border: 1px solid var(--borda);
-  border-radius: var(--raio-botao);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 
-.opcoes legend {
+.options legend {
   padding: 0 0.3rem;
   font-weight: 600;
 }
 
-.opcao {
+.option {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -294,11 +294,11 @@ textarea:user-invalid {
 
 input[type="radio"],
 input[type="checkbox"] {
-  accent-color: var(--vermelho);
+  accent-color: var(--red);
 }
 
 /* Barra acima da lista: busca e filtro lado a lado */
-.barra-busca {
+.search-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -306,43 +306,43 @@ input[type="checkbox"] {
   margin-bottom: 1.5rem;
 }
 
-.barra-busca input[type="search"] {
+.search-bar input[type="search"] {
   flex: 1 1 250px;
 }
 
 /* ========== 8. MENSAGENS: carregando, vazio, erro e sucesso ========== */
-.mensagem {
+.message {
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: var(--superficie);
-  border-radius: var(--raio-card);
-  color: var(--texto-suave);
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
 }
 
-.mensagem.erro {
-  border-left: 4px solid var(--vermelho);
-  color: var(--texto);
+.message.error {
+  border-left: 4px solid var(--red);
+  color: var(--text);
 }
 
-.mensagem.sucesso {
-  border-left: 4px solid var(--verde);
-  color: var(--texto);
+.message.success {
+  border-left: 4px solid var(--green);
+  color: var(--text);
 }
 
 /* ========== 9. RODAPÉ ========== */
-.rodape {
+.site-footer {
   margin-top: auto;
   padding: 2rem 0;
-  background: var(--superficie);
-  border-top: 1px solid var(--borda);
-  color: var(--texto-suave);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
   font-size: 0.875rem;
   text-align: center;
 }
 
 /* ========== 10. RESPONSIVIDADE (mobile first) ========== */
 @media (min-width: 600px) {
-  .grade {
+  .grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -352,7 +352,7 @@ input[type="checkbox"] {
     font-size: 3.5rem;
   }
 
-  .grade {
+  .grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
