@@ -52,9 +52,10 @@ main p a:visited {
   color: var(--red-dark);
 }
 
-/* Foco visível para quem navega pelo teclado */
+/* Foco visível para quem navega pelo teclado.
+   Branco, para não se confundir com o vermelho de erro. */
 :focus-visible {
-  outline: 2px solid var(--red);
+  outline: 2px solid var(--text);
   outline-offset: 2px;
 }
 
