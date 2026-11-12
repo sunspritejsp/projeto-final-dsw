@@ -1,164 +1,358 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-/* 1. Variáveis: a identidade visual da Etapa 1 fica toda aqui */
+/* ========== 1. VARIÁVEIS — identidade visual da Etapa 1 ========== */
 :root {
   --fundo: #121214;
   --superficie: #1E1E24;
   --borda: #2A2A32;
   --vermelho: #E50914;
   --vermelho-escuro: #B80710;
+  --verde: #22C55E;
   --texto: #FFFFFF;
   --texto-suave: #A1A1AA;
-  --verde: #22C55E;
+  --raio-botao: 4px;
+  --raio-card: 8px;
+  --transicao: 0.2s ease;
 }
 
-/* 2. Base */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ========== 2. BASE ========== */
+* {
+  box-sizing: border-box; /* largura inclui padding e borda */
+  margin: 0;
+  padding: 0;
+}
 
 body {
+  display: flex;
+  flex-direction: column; /* empurra o rodapé para o fim da tela */
+  min-height: 100vh;
   background: var(--fundo);
   color: var(--texto);
   font-family: 'Inter', system-ui, sans-serif;
   line-height: 1.6;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column; /* empurra o rodapé para o fim da tela */
 }
 
-a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
+img {
+  display: block;
+  max-width: 100%;
+}
 
-.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-/* 3. Cabeçalho e menu */
-.site-header {
-  background: var(--superficie);
-  border-bottom: 1px solid var(--borda);
+/* Links dentro de textos: sublinhados e com cor de visitado */
+main p a {
+  color: var(--vermelho);
+  text-decoration: underline;
+}
+
+main p a:visited {
+  color: var(--vermelho-escuro);
+}
+
+/* Foco visível para quem navega pelo teclado */
+:focus-visible {
+  outline: 2px solid var(--vermelho);
+  outline-offset: 2px;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.escondido {
+  display: none;
+}
+
+/* ========== 3. CABEÇALHO E MENU (Flexbox) ========== */
+.cabecalho {
   position: sticky;
   top: 0;
   z-index: 10; /* fica por cima dos cards ao rolar */
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
 }
 
-.nav-container {
+.menu {
   display: flex;
+  flex-wrap: wrap; /* no celular, os links descem para a linha de baixo */
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.5rem;
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
 
-.logo { font-size: 1.5rem; font-weight: 700; }
-.logo span { color: var(--vermelho); }
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
 
-.main-nav { display: flex; gap: 1.5rem; list-style: none; }
-.nav-link { color: var(--texto-suave); font-weight: 600; }
-.nav-link:hover, .nav-link.active { color: var(--vermelho); }
+.logo span {
+  color: var(--vermelho);
+}
 
-/* 4. Botões */
-.btn {
+.menu-links {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+}
+
+.menu-link {
+  color: var(--texto-suave);
+  font-weight: 600;
+  transition: color var(--transicao);
+}
+
+.menu-link:hover,
+.menu-link.ativo {
+  color: var(--vermelho);
+}
+
+/* ========== 4. BOTÕES ========== */
+.botao {
   display: inline-block;
   padding: 0.6rem 1.2rem;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--raio-botao);
+  background: var(--vermelho);
+  color: var(--texto);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  background: var(--vermelho);
-  color: var(--texto);
-  transition: background 0.2s, transform 0.2s;
+  transition: background var(--transicao), transform var(--transicao);
 }
-.btn:hover { background: var(--vermelho-escuro); transform: translateY(-2px); }
-.btn:disabled { opacity: 0.5; cursor: wait; }
-.btn-secundario { background: var(--borda); }
-.btn-secundario:hover { background: var(--texto-suave); }
 
-/* 5. Banner do topo e títulos */
+.botao:hover {
+  background: var(--vermelho-escuro);
+  transform: translateY(-2px);
+}
+
+.botao:active {
+  transform: scale(0.97); /* "afunda" no clique */
+}
+
+.botao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.botao-secundario {
+  background: var(--borda);
+}
+
+.botao-secundario:hover {
+  background: var(--texto-suave);
+}
+
+/* ========== 5. BANNER E TÍTULOS ========== */
 .banner {
-  background: linear-gradient(135deg, var(--vermelho-escuro), var(--fundo) 70%);
   padding: 5rem 0;
+  background: linear-gradient(135deg, var(--vermelho-escuro), var(--fundo) 70%);
 }
-.banner h1 { font-size: 2.5rem; line-height: 1.2; margin-bottom: 1rem; }
-.banner p { color: var(--texto-suave); max-width: 600px; margin-bottom: 1.5rem; }
 
-.section-title {
-  font-size: 1.75rem;
+.banner h1 {
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+.banner p {
+  max-width: 600px;
+  margin-bottom: 1.5rem;
+  color: var(--texto-suave);
+}
+
+.titulo-secao {
   margin: 3rem 0 1.5rem;
-  border-left: 4px solid var(--vermelho);
   padding-left: 0.75rem;
+  border-left: 4px solid var(--vermelho);
+  font-size: 1.75rem;
 }
 
-/* 6. Grade de cards de filme */
-.movies-grid {
+.texto {
+  max-width: 70ch;
+  margin-bottom: 1rem;
+  color: var(--texto-suave);
+}
+
+/* ========== 6. GRADE E CARDS (Grid + Flexbox) ========== */
+.grade {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr; /* celular: uma coluna */
   gap: 1.5rem;
   margin-bottom: 4rem;
 }
 
-.movie-card {
-  background: var(--superficie);
-  border-radius: 8px;
-  overflow: hidden;
+.card {
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s;
-}
-.movie-card:hover { transform: translateY(-5px); }
-.movie-card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
-.movie-info { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; }
-.movie-card h3 { font-size: 1.1rem; }
-.movie-meta { color: var(--texto-suave); font-size: 0.875rem; }
-.card-acoes { display: flex; gap: 0.5rem; margin-top: auto; }
-
-/* 7. Formulário */
-.form-filme {
+  overflow: hidden;
   background: var(--superficie);
-  border: 1px solid var(--borda);
-  border-radius: 8px;
-  padding: 1.5rem;
-  display: grid;
-  gap: 1rem;
+  border-radius: var(--raio-card);
+  transition: transform var(--transicao);
 }
-.form-filme label { display: flex; flex-direction: column; gap: 0.3rem; font-weight: 600; }
 
-input, select, textarea {
-  background: var(--fundo);
-  color: var(--texto);
-  border: 1px solid var(--borda);
-  border-radius: 4px;
-  padding: 0.6rem;
-  font: inherit;
+.card:hover {
+  transform: translateY(-5px);
 }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--vermelho); }
-.campo-erro { border-color: var(--vermelho); }
-.erro-texto { color: var(--vermelho); font-size: 0.85rem; font-weight: 400; }
 
-.busca { width: 100%; margin-bottom: 1.5rem; }
+.card img {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
 
-/* 8. Mensagens de estado: carregando, vazio, erro e sucesso */
-.mensagem { padding: 1rem; border-radius: 8px; background: var(--superficie); color: var(--texto-suave); }
-.mensagem.erro { border-left: 4px solid var(--vermelho); color: var(--texto); }
-.mensagem.sucesso { border-left: 4px solid var(--verde); color: var(--texto); }
-.escondido { display: none; }
+.card-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 0.5rem;
+  padding: 1rem;
+}
 
-/* 9. Rodapé */
-.site-footer {
-  margin-top: auto;
-  background: var(--superficie);
-  border-top: 1px solid var(--borda);
-  padding: 2rem 0;
-  text-align: center;
+.card-detalhe {
   color: var(--texto-suave);
   font-size: 0.875rem;
 }
 
-/* 10. Responsividade (mobile first: começa com 1 coluna) */
-@media (min-width: 600px) {
-  .movies-grid { grid-template-columns: repeat(2, 1fr); }
+.card-acoes {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto; /* botões sempre no rodapé do card */
 }
+
+/* ========== 7. FORMULÁRIOS ========== */
+.formulario {
+  display: grid;
+  gap: 1rem;
+  max-width: 640px;
+  padding: 1.5rem;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-card);
+}
+
+/* Cada campo: rótulo em cima, controle embaixo */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  padding: 0.6rem;
+  background: var(--fundo);
+  color: var(--texto);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-botao);
+  font: inherit;
+  transition: border-color var(--transicao);
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* :invalid que só aparece depois que o usuário mexeu no campo */
+input:user-invalid,
+select:user-invalid,
+textarea:user-invalid {
+  border-color: var(--vermelho);
+}
+
+/* Grupo de opções (radio e checkbox) */
+.opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-botao);
+}
+
+.opcoes legend {
+  padding: 0 0.3rem;
+  font-weight: 600;
+}
+
+.opcao {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--vermelho);
+}
+
+/* Barra acima da lista: busca e filtro lado a lado */
+.barra-busca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.barra-busca input[type="search"] {
+  flex: 1 1 250px;
+}
+
+/* ========== 8. MENSAGENS: carregando, vazio, erro e sucesso ========== */
+.mensagem {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--superficie);
+  border-radius: var(--raio-card);
+  color: var(--texto-suave);
+}
+
+.mensagem.erro {
+  border-left: 4px solid var(--vermelho);
+  color: var(--texto);
+}
+
+.mensagem.sucesso {
+  border-left: 4px solid var(--verde);
+  color: var(--texto);
+}
+
+/* ========== 9. RODAPÉ ========== */
+.rodape {
+  margin-top: auto;
+  padding: 2rem 0;
+  background: var(--superficie);
+  border-top: 1px solid var(--borda);
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* ========== 10. RESPONSIVIDADE (mobile first) ========== */
+@media (min-width: 600px) {
+  .grade {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (min-width: 900px) {
-  .banner h1 { font-size: 3.5rem; }
-  .movies-grid { grid-template-columns: repeat(4, 1fr); }
+  .banner h1 {
+    font-size: 3.5rem;
+  }
+
+  .grade {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
