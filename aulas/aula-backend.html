@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Backend do CineMais: rotas, validação e banco</title>
+<style>
+/* Guided lesson shell. Replace the tokens per subject; keep the hierarchy:
+   progress → title → scene → one narration line + one primary action. */
+:root {
+  --font:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --bg:#f6f5f1;
+  --surface:#fff;
+  --ink:#14161b;
+  --muted:#6b6f78;
+  --faint:#a3a6ad;
+  --line:#e6e3dc;
+  --accent:#3b5bdb;
+  --accent-soft:#e9edff;
+  --accent-ink:#2a44b8;
+  --warm:#f59f00;
+  --warm-soft:#fff3d6;
+  --good:#0c8a5f;
+  --good-soft:#e3f6ee;
+  --bad:#d9480f;
+  --bad-soft:#fdebe2;
+  --radius:20px;
+  font-family:var(--font);
+  color:var(--ink);
+  background:var(--bg);
+  font-feature-settings:'cv11','ss01';
+  -webkit-font-smoothing:antialiased
+}
+* { box-sizing:border-box }
+html,body { margin:0; height:100% }
+body { background:var(--bg) }
+button,input,select,textarea { font:inherit; color:inherit }
+button { cursor:pointer }
+button:disabled { cursor:default }
+:focus-visible { outline:3px solid var(--accent); outline-offset:3px; border-radius:8px }
+
+.lp { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto; height:100dvh; max-width:1360px; margin:0 auto; padding:0 clamp(16px,3vw,44px) }
+.lp-top { display:flex; align-items:center; gap:24px; height:64px }
+.lp-course { margin:0; font-size:14px; font-weight:600; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:30%}
+.lp-progress { flex:1; display:flex; gap:4px }
+.lp-progress button { flex:1; background:none; border:0; padding:12px 0 }
+.lp-progress span { display:block; height:5px; border-radius:99px; background:var(--line) }
+.lp-progress .done span { background:color-mix(in srgb,var(--accent) 45%,var(--line)) }
+.lp-progress [aria-current] span { background:var(--accent) }
+.lp-progress button:hover span { background:var(--faint) }
+
+.lp-stage { display:flex; flex-direction:column; min-height:0; padding-top:6px }
+.lp-kicker { margin:0; font-size:13px; font-weight:650; letter-spacing:.12em; text-transform:uppercase; color:var(--accent) }
+.lp-stage h1 { margin:6px 0 0; font-size:clamp(28px,3vw,42px); line-height:1.08; font-weight:720; letter-spacing:-.025em; max-width:30ch; text-wrap:balance }
+.lp-scene { position:relative; flex:1; min-height:0; margin:18px 0 12px; background:var(--surface); border-radius:var(--radius); box-shadow:0 1px 2px rgba(20,22,27,.04),0 12px 40px rgba(20,22,27,.06); overflow:hidden; display:flex }
+.lp-scene > * { flex:1; min-width:0 }
+.lp-inputs { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; margin:0 0 6px }
+.lp-inputs[hidden] { display:none }
+.lp-label { font-size:15px; font-weight:600; color:var(--muted) }
+.lp-value { font:600 18px var(--mono); min-width:4ch; color:var(--ink) }
+.lp-inputs input[type=range] { width:min(320px,60vw); accent-color:var(--accent) }
+.lp-inputs select { padding:10px 12px; border:1.5px solid var(--line); border-radius:12px; background:var(--surface) }
+.lp-choices { display:flex; flex-wrap:wrap; align-items:center; gap:10px }
+.lp-choice { padding:11px 18px; border:1.5px solid var(--line); border-radius:14px; background:var(--surface); font-size:17px; font-weight:550 }
+.lp-choice:hover { border-color:var(--faint) }
+.lp-choice[aria-pressed=true] { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink) }
+
+.lp-bar { display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; align-items:center; gap:18px; padding:12px 0 18px; border-top:1px solid var(--line) }
+.lp-narration p { margin:0; min-height:2.8em; display:flex; align-items:center; font-size:clamp(17px,1.45vw,21px); line-height:1.4; font-weight:520; text-wrap:pretty }
+.lp-dots { display:flex; gap:6px; margin-top:4px; height:6px }
+.lp-dots i { width:6px; height:6px; border-radius:99px; background:var(--line) }
+.lp-dots .done { background:color-mix(in srgb,var(--accent) 45%,var(--line)) }
+.lp-dots .now { width:20px; background:var(--accent) }
+.lp-go { display:flex; flex-direction:column; align-items:center; gap:4px }
+.lp-primary { min-width:170px; padding:15px 28px; border:0; border-radius:999px; background:var(--ink); color:#fff; font-size:17px; font-weight:650; box-shadow:0 6px 18px rgba(20,22,27,.18) }
+/* No CSS transitions on anything the timeline or the capture touches: they would run outside seek. */
+.lp-primary:hover:not(:disabled) { background:#000; transform:translateY(-1px) }
+.lp-primary:disabled { background:var(--faint); box-shadow:none }
+.lp-keys { font-size:12px; color:var(--faint) }
+.lp-ghost { background:none; border:0; border-radius:10px; padding:10px 14px; font-size:15px; font-weight:550; color:var(--muted) }
+.lp-ghost:hover:not(:disabled) { background:color-mix(in srgb,var(--line) 70%,transparent); color:var(--ink) }
+.lp-ghost:disabled { opacity:.35 }
+.lp-replay { font-size:22px; padding:6px 12px }
+.lp-replay[hidden] { display:block; visibility:hidden }
+
+.lp-drawer { position:fixed; inset:0 0 0 auto; width:min(440px,92vw); background:var(--surface); box-shadow:-20px 0 60px rgba(20,22,27,.15); padding:24px 28px; overflow:auto; z-index:10; font-size:15px; line-height:1.55 }
+.lp-drawer[hidden] { display:none }
+.lp-drawer-head { display:flex; justify-content:space-between; align-items:center }
+.lp-drawer h2 { margin:0; font-size:20px }
+.lp-drawer h3 { margin:22px 0 6px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted) }
+.lp-drawer ul { margin:0; padding-left:18px }
+.lp-drawer li { margin:8px 0 }
+.lp-drawer a { color:var(--accent-ink) }
+.lp-drawer p { margin:2px 0 0; color:var(--muted) }
+
+/* Scene building blocks. A scene uses one of them; text inside stays short. */
+.sc-split { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:clamp(20px,3vw,48px); align-items:center; padding:clamp(20px,3vw,44px) }
+.sc-center { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:18px; padding:clamp(20px,3vw,44px) }
+.sc-full { display:flex; padding:clamp(12px,2vw,28px) }
+.sc-full > svg, .sc-visual > svg { width:100%; height:100%; display:block }
+.sc-visual { min-height:0; height:100%; display:flex; align-items:center }
+.sc-say { margin:0; font-size:clamp(24px,2.3vw,34px); line-height:1.22; font-weight:650; letter-spacing:-.015em; text-wrap:balance }
+.sc-sub { margin:14px 0 0; font-size:clamp(16px,1.3vw,19px); line-height:1.5; color:var(--muted); text-wrap:pretty }
+/* Deeper explanation: body style, comfortable measure, same place on every screen that has one. */
+.sc-read { margin:16px 0 0; font-size:clamp(16px,1.25vw,18px); line-height:1.65; color:var(--ink); max-width:62ch; text-wrap:pretty }
+.sc-term { display:inline-block; padding:2px 10px; border-radius:8px; background:var(--accent-soft); color:var(--accent-ink); font-weight:650 }
+.sc-big { font-size:clamp(56px,7vw,112px); line-height:1; font-weight:760; letter-spacing:-.04em; font-variant-numeric:tabular-nums }
+.sc-label { font-size:14px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted) }
+.sc-note { font-size:13px; color:var(--faint) }
+.sc-feedback { margin:18px 0 0; padding:16px 18px; border-radius:14px; font-size:18px; line-height:1.5; background:var(--good-soft); color:#075c3f }
+.sc-feedback.wrong { background:var(--bad-soft); color:#9a330a }
+.lp svg text { font-family:var(--font) }
+.sc-only-narrow { display:none!important }
+
+/* Practice: the question and its answer cards form one group in the middle of the screen. */
+.lp[data-kind=pratica] .lp-stage { justify-content:center }
+.lp[data-kind=pratica] .lp-scene { flex:0 1 auto; min-height:260px }
+.lp[data-kind=pratica] .lp-inputs { justify-content:center; margin:6px 0 24px }
+.lp[data-kind=pratica] .lp-inputs .lp-label { display:none }
+.lp[data-kind=pratica] .lp-choice { padding:16px 26px; font-size:19px }
+
+/* kit.js blocks */
+.sc-copy { max-width:44ch }
+.sc-question { max-width:780px }
+.sc-question .sc-say { font-size:clamp(26px,2.4vw,34px) }
+.sc-cards { flex:1; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:22px; padding:clamp(20px,3vw,44px); align-content:center }
+.sc-card { padding:28px; border-radius:18px; background:var(--bg) }
+.sc-card b { display:block; font-size:44px; margin-bottom:12px }
+.sc-card p { margin:0; font-size:21px; line-height:1.35; font-weight:620 }
+.sc-card span { display:block; margin-top:10px; font-size:16px; color:var(--muted) }
+.mock-app { width:min(clamp(380px,40vw,600px),100%); font-size:clamp(16px,1.3vw,19px); border-radius:28px; background:var(--surface); border:1px solid var(--line); box-shadow:0 24px 60px rgba(20,22,27,.16); overflow:hidden; text-align:left }
+.mock-app-bar { display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--line); font-size:16px }
+.mock-app-bar em { font-style:normal; font-size:12px; font-weight:600; color:var(--muted); padding:2px 8px; border-radius:6px; background:var(--bg) }
+.mock-app-body { padding:20px 22px 24px; display:flex; flex-direction:column; gap:14px }
+.app-row { display:flex; justify-content:space-between; align-items:center; padding:clamp(14px,1.4vw,20px) 18px; border-radius:14px; background:var(--bg); font-size:inherit }
+.app-row b { font:650 1.2em var(--font); font-variant-numeric:tabular-nums }
+.app-row.on { background:var(--accent-soft); color:var(--accent-ink) }
+.app-hero { padding:6px 4px 10px }
+.app-hero span { display:block; color:var(--muted) }
+.app-hero b { display:block; margin-top:6px; font-size:2.4em; font-weight:720; letter-spacing:-.02em; font-variant-numeric:tabular-nums }
+.app-btn { padding:14px; border-radius:14px; background:var(--accent); color:#fff; text-align:center; font-weight:650 }
+.app-toast { padding:12px 14px; border-radius:12px; background:var(--good-soft); color:#075c3f; font-weight:600 }
+
+/* Realistic mock of a tool. Label it as a simulation inside the scene. */
+/* A mock fills the scene: it is the evidence the screen is about, not a thumbnail. */
+.mock { width:100%; max-width:1040px; border-radius:16px; overflow:hidden; background:#16181d; color:#e8e9ec; box-shadow:0 20px 50px rgba(20,22,27,.25); font:clamp(15px,1.35vw,20px)/1.6 var(--mono); text-align:left }
+.mock-bar { display:flex; align-items:center; gap:8px; padding:12px 16px; background:#202329; font:600 13px var(--font); color:#9aa0aa }
+.mock-bar i { width:12px; height:12px; border-radius:99px; background:#3a3e46 }
+.mock-bar span { margin-left:10px }
+.mock-bar em { margin-left:auto; font-style:normal; font-weight:500; padding:2px 8px; border-radius:6px; background:#2c3038 }
+.mock pre { margin:0; padding:22px 26px; min-height:clamp(220px,38vh,420px); white-space:pre-wrap; font:inherit }
+.mock .p { color:#7c8494 }
+.mock .k { color:#8fb4ff }
+.mock .s { color:#ffd479 }
+.mock .ok { color:#5ee0a5 }
+.mock .warn { color:#ff9f6e }
+.mock .hl { background:rgba(255,212,121,.16); border-radius:4px; box-shadow:0 0 0 3px rgba(255,212,121,.16) }
+.mock .cursor { display:inline-block; width:.6em; height:1.1em; vertical-align:-.15em; background:#e8e9ec }
+
+@media (max-width:760px), (max-height:640px) {
+  .lp { height:auto; min-height:100dvh; grid-template-rows:auto auto auto }
+  .lp-course { display:none }
+  .lp-scene { min-height:340px }
+  .lp-bar { grid-template-columns:auto 1fr auto }
+  .lp-narration { grid-column:1/-1; order:-1 }
+  .lp-keys { display:none }
+  .lp-primary { min-width:0 }
+  .sc-split { grid-template-columns:1fr }
+  .sc-only-wide { display:none!important }
+  .sc-only-narrow { display:block!important }
+  .sc-wide { overflow-x:auto }
+  .sc-wide > svg { width:760px!important; height:auto!important; flex:none }
+  .mock { font-size:13px }
+}
+@media (prefers-reduced-motion:reduce) { * { transition:none!important; scroll-behavior:auto!important } }
+
+</style>
+<style>
+/* Tese: um pedido viaja da tela até o banco e volta. Violeta = peças do sistema; âmbar = o que está acontecendo agora. */
+:root { --accent:#5b3fd1; --accent-soft:#eeeaff; --accent-ink:#4127a8; --warm:#e8890c; --warm-soft:#fff1dc }
+svg .nd { fill:var(--surface); stroke:var(--accent); stroke-width:2.5 }
+svg .nd.on { fill:var(--warm-soft); stroke:var(--warm); stroke-width:4 }
+svg .nd.dim { stroke:var(--line) }
+svg .tt { font-weight:650; fill:var(--ink); dominant-baseline:central }
+svg .lb { font-weight:550; fill:var(--muted); dominant-baseline:central }
+svg .ac { font-weight:650; fill:var(--accent-ink); dominant-baseline:central }
+svg .wm { font-weight:700; fill:#9a5200; dominant-baseline:central }
+svg .ok { font-weight:700; fill:var(--good); dominant-baseline:central }
+svg .no { font-weight:700; fill:var(--bad); dominant-baseline:central }
+svg .mono { font-family:var(--mono)!important }
+svg .mid { text-anchor:middle }
+svg .row { fill:var(--bg) }
+svg .row.on { fill:var(--warm-soft); stroke:var(--warm); stroke-width:3 }
+svg .ed { stroke:var(--line); stroke-width:4; stroke-linecap:round; fill:none }
+svg .ed.on { stroke:var(--warm); stroke-width:5 }
+svg .ed.back { stroke-dasharray:10 10 }
+.nw { white-space:nowrap }
+.lp[data-kind=mock] .mock { max-width:1120px; font-size:clamp(16px,1.4vw,21px) }
+.lp[data-kind=mock] .mock.code { font-size:inherit }
+.code pre { font-size:clamp(15px,1.3vw,19px); line-height:1.7; min-height:0 }
+.code .ln { display:block; padding:0 6px; border-radius:4px }
+.code .ln.dim { opacity:.38 }
+.code .c { color:#7c8494 }
+.lp[data-kind=mock] .sc-center { justify-content:flex-start; padding-top:clamp(16px,3vh,40px) }
+.lp[data-kind=mock] .mock pre { min-height:300px }
+.lp[data-kind=pratica] .lp-stage { justify-content:flex-start; padding-top:clamp(8px,4vh,40px) }
+.lp[data-kind=pratica] .sc-center { justify-content:flex-start }
+.lp[data-kind=pratica] .sc-question .sc-say { font-size:clamp(22px,2vw,29px) }
+.lp[data-kind=resumo] .sc-card { padding:34px 30px } .lp[data-kind=resumo] .sc-card p { font-size:25px } .lp[data-kind=resumo] .sc-card span { font-size:18px }
+.sc-visual > .sc-full { flex:1; height:100%; min-width:0; padding:0 }
+@media (max-width:760px) {
+  .lp[data-kind=mock] .sc-center { padding:10px } .lp[data-kind=mock] .mock { font-size:11.5px } .lp[data-kind=mock] .mock pre { padding:14px 12px; min-height:200px }
+  .code pre { font-size:11.5px; line-height:1.6 }
+  .lp[data-kind=pratica] .lp-choice { padding:11px 16px; font-size:16px } .lp[data-kind=pratica] .sc-question .sc-say { font-size:20px }
+  .lp[data-kind=resumo] .sc-cards { gap:12px; padding:14px } .lp[data-kind=resumo] .sc-card { padding:18px 20px } .lp[data-kind=resumo] .sc-card b { font-size:28px; margin-bottom:6px } .lp[data-kind=resumo] .sc-card p { font-size:18px }
+}
+</style></head><body><div id="lesson"></div>
+<script type="application/json" id="fontes">[
+{"id":"express","title":"Express 5 — Routing","url":"https://expressjs.com/en/guide/routing.html","note":"app.get/post/put/delete; parâmetros como :id em req.params."},
+{"id":"expressjson","title":"Express 5 — express.json()","url":"https://expressjs.com/en/5x/api.html#express.json","note":"Transforma o corpo JSON em req.body."},
+{"id":"resjson","title":"Express 5 — res.status() e res.json()","url":"https://expressjs.com/en/5x/api.html#res.status","note":"Escolhem o código e enviam o JSON."},
+{"id":"bsqlite","title":"better-sqlite3 — API","url":"https://github.com/WiseLibs/better-sqlite3/blob/master/docs/api.md","note":"prepare, run (changes, lastInsertRowid), get, all; parâmetros ?."},
+{"id":"sqlite-auto","title":"SQLite — AUTOINCREMENT","url":"https://www.sqlite.org/autoinc.html","note":"Ids apagados não são reutilizados."},
+{"id":"mdn-status","title":"MDN — códigos de status HTTP","url":"https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status","note":"200, 201, 204, 400, 404, 500."},
+{"id":"owasp","title":"OWASP — prevenção de SQL injection","url":"https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html","note":"Consultas parametrizadas."},
+{"id":"execucao","title":"Execução local (12/11/2026)","url":"https://curl.se/docs/manpage.html","note":"Node 24.15.0, Express 5.3.0, better-sqlite3 13.1.1. Saídas reais; cabeçalhos reduzidos à primeira linha e ao Content-Type."}
+]</script>
+<script>
+/* Pure motion helpers. No clocks, timers, DOM reads or hidden random state. */
+(function (global) {
+  'use strict';
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  const linear = x => clamp(x);
+  const easeInOutCubic = x => (x = clamp(x)) < .5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2;
+  const easeOutCubic = x => 1 - (1 - clamp(x)) ** 3;
+  const lerp = (a, b, p) => a + (b - a) * p;
+  function segment(t, start, end, easing = linear) {
+    if (end <= start) return t >= end ? 1 : 0;
+    return easing(clamp((t - start) / (end - start)));
+  }
+  function cubic(a, b, c, d, p) {
+    const u = 1 - clamp(p); p = clamp(p);
+    return {
+      x: u ** 3 * a.x + 3 * u ** 2 * p * b.x + 3 * u * p ** 2 * c.x + p ** 3 * d.x,
+      y: u ** 3 * a.y + 3 * u ** 2 * p * b.y + 3 * u * p ** 2 * c.y + p ** 3 * d.y
+    };
+  }
+  function contain(source, destination) {
+    if (source.w <= 0 || source.h <= 0) throw new Error('Source must have positive dimensions');
+    const scale = Math.min(destination.w / source.w, destination.h / source.h);
+    return {
+      scale,
+      x: destination.x + (destination.w - source.w * scale) / 2 - source.x * scale,
+      y: destination.y + (destination.h - source.h * scale) / 2 - source.y * scale
+    };
+  }
+  function seeded(seed, index) {
+    let x = ((seed | 0) ^ Math.imul((index | 0) + 1, 0x9e3779b1)) >>> 0;
+    x ^= x >>> 16; x = Math.imul(x, 0x85ebca6b) >>> 0;
+    x ^= x >>> 13; x = Math.imul(x, 0xc2b2ae35) >>> 0;
+    return ((x ^ (x >>> 16)) >>> 0) / 4294967296;
+  }
+  const easeOutQuint = x => 1 - (1 - clamp(x)) ** 5;
+  const easeInOutQuart = x => (x = clamp(x)) < .5 ? 8 * x ** 4 : 1 - (-2 * x + 2) ** 4 / 2;
+  // Damped spring from 0 to 1, evaluated analytically so any seek gives the same frame.
+  // Overshoot stays small (~4%): use for emphasis only, never for quantities with limits.
+  function spring(x, { damping = .72, frequency = 2.2 } = {}) {
+    x = clamp(x); if (x >= 1) return 1;
+    const w = 2 * Math.PI * frequency, d = Math.sqrt(1 - damping ** 2);
+    return 1 - Math.exp(-damping * w * x) * (Math.cos(w * d * x) + damping / d * Math.sin(w * d * x));
+  }
+  // Text and objects enter by fading and rising a few pixels; nothing slides across the screen.
+  function enter(t, start, length = .55, rise = 14) {
+    const p = easeOutCubic(segment(t, start, start + length));
+    return { opacity: p, y: (1 - p) * rise, p, style: `opacity:${p.toFixed(3)};transform:translateY(${((1 - p) * rise).toFixed(2)}px)` };
+  }
+  // i-th item of a group: start + i * gap.
+  const stagger = (t, i, start, gap = .08, length = .5, easing = easeOutCubic) => segment(t, start + i * gap, start + i * gap + length, easing);
+  // 0 → 1 → 0 bump, e.g. a highlight that pulses once when something arrives.
+  const pulse = (t, at, length = .6) => Math.sin(Math.PI * segment(t, at, at + length));
+  // Interpolated SVG viewBox: a camera that frames the part being explained.
+  function camera(a, b, p) { return [a.x, a.y, a.w, a.h].map((v, i) => lerp(v, [b.x, b.y, b.w, b.h][i], p).toFixed(2)).join(' '); }
+  // Characters typed at a constant rate; the frame depends only on t.
+  const typed = (text, t, start, cps = 28) => text.slice(0, Math.max(0, Math.floor((t - start) * cps)));
+  function escape(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  }
+  function number(value, { locale = 'pt-BR', digits = 1 } = {}) {
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: digits }).format(value);
+  }
+  global.LessonMotion = Object.freeze({ clamp, linear, easeInOutCubic, easeOutCubic, easeOutQuint, easeInOutQuart, spring, enter, stagger, pulse, camera, typed, lerp, segment, cubic, contain, seeded, escape, number });
+})(window);
+
+</script><script>
+/* Scene kit: building blocks for the screen kinds of a guided lesson.
+   Every function is pure: same state and time → same markup. Requires motion.js. */
+(function (global) {
+  'use strict';
+  const M = global.LessonMotion, esc = M.escape;
+  const op = v => `opacity="${M.clamp(v).toFixed(3)}"`;
+  // SVG attributes for an element entering with fade + small rise (see M.enter).
+  const rise = e => `opacity="${e.opacity.toFixed(3)}" transform="translate(0 ${e.y.toFixed(2)})"`;
+
+  // Full-width drawing. Size w×h to the content itself, with no empty margins: the drawing then
+  // fills the scene on desktop and stays readable when it shrinks to a phone width.
+  // `view` lets a camera frame part of the drawing; mark it so the checker knows clipping is
+  // intended and only data-qa-focal must stay in frame. `scroll` is a last resort for drawings
+  // that cannot be recomposed: a phone then pans a 760 px wide copy.
+  // `narrow: { body, w, h }` is a recomposed version (e.g. stacked vertically) shown only on phones;
+  // render both from the same state: CSS picks one, so render stays independent of the viewport.
+  function diagram(body, { w = 1200, h = 560, view, camera = false, scroll = false, defs = '', narrow = null } = {}) {
+    const one = (b, box, cls) => `<svg class="${cls}" viewBox="${box}" preserveAspectRatio="xMidYMid meet" role="img" ${camera ? 'data-qa-camera="câmera segue o foco"' : ''}>${defs}${b}</svg>`;
+    const wide = one(body, view || `0 0 ${w} ${h}`, narrow ? 'sc-only-wide' : '');
+    const tall = narrow ? one(narrow.body, narrow.view || `0 0 ${narrow.w} ${narrow.h}`, 'sc-only-narrow') : '';
+    return `<div class="sc-full ${scroll ? 'sc-wide" data-qa-scroll="diagrama rola no celular' : ''}">${wide}${tall}</div>`;
+  }
+  // Copy on the left, visual on the right: the screen's single text region. `say` is the idea in one sentence;
+  // `sub` a short complement; `read` an optional deeper explanation (up to ~5 lines) in the body style.
+  function split({ say, sub = '', read = '', visual, kicker = '' }) {
+    return `<div class="sc-split"><div class="sc-copy">${kicker ? `<p class="sc-label">${kicker}</p>` : ''}<p class="sc-say" data-qa-text="say">${say}</p>${sub ? `<p class="sc-sub" data-qa-text="sub">${sub}</p>` : ''}${read ? `<p class="sc-read" data-qa-text="read">${read}</p>` : ''}</div><div class="sc-visual">${visual}</div></div>`;
+  }
+  // One big statement or number in the middle of the screen.
+  function hero({ big = '', say = '', sub = '', style = '' }) {
+    return `<div class="sc-center" style="${style}">${big ? `<p class="sc-big" data-qa-text="big">${big}</p>` : ''}${say ? `<p class="sc-say" data-qa-text="say">${say}</p>` : ''}${sub ? `<p class="sc-sub" data-qa-text="sub">${sub}</p>` : ''}</div>`;
+  }
+
+  // Terminal mock. `script[k]` holds the lines shown during step k: earlier steps appear complete,
+  // later steps are absent. A line is typed ({type:true,text,at,cps}) or shown ({text,at,cls,hl}).
+  // A highlight (hl) belongs to its own step only, so one thing is lit at a time; `keep: true` keeps it.
+  function terminal(state, time, script, { title = 'terminal', prompt = '$ ', badge = 'simulação' } = {}) {
+    let out = '';
+    script.forEach((lines, k) => {
+      if (k > state.step) return;
+      const t = k < state.step ? 1e9 : time;
+      for (const line of lines) {
+        if (t < line.at) continue;
+        if (line.type) {
+          const typed = M.typed(line.text, t, line.at, line.cps || 30), typing = typed.length < line.text.length;
+          out += `<span class="p">${esc(line.prompt ?? prompt)}</span><span class="k">${esc(typed)}</span>${typing ? '<span class="cursor"></span>' : ''}\n`;
+        } else {
+          const e = M.enter(t, line.at, .35, 6), hl = line.hl !== undefined && t >= line.hl && (k === state.step || line.keep);
+          out += `<span class="${line.cls || ''} ${hl ? 'hl' : ''}" style="${e.style};display:inline-block">${esc(line.text)}</span>\n`;
+        }
+      }
+    });
+    return `<div class="sc-center"><div class="mock" data-qa-text="terminal"><div class="mock-bar"><i></i><i></i><i></i><span>${esc(title)}</span><em>${esc(badge)}</em></div><pre>${out}</pre></div></div>`;
+  }
+  // App/screen mock: a device-like card with a title bar. `body` is HTML built from .app-* classes.
+  function app({ title, body, badge = 'simulação', note = '' }) {
+    return `<div class="sc-center"><div class="mock-app" data-qa-text="app"><div class="mock-app-bar"><b>${esc(title)}</b><em>${esc(badge)}</em></div><div class="mock-app-body">${body}</div></div>${note ? `<p class="sc-note">${esc(note)}</p>` : ''}</div>`;
+  }
+
+  // Practice screen with choice cards. Continuar stays disabled until an answer exists;
+  // the second step ("Conferir") reveals feedback specific to the chosen answer.
+  function quiz({ id, kicker = '', title, question, hint = '', options, correct, feedback, sources, lang = 'pt-BR' }) {
+    const T = { 'pt-BR': ['Escolha uma resposta', 'Conferir', 'Escolha uma resposta abaixo.', 'Boa. Agora confira.', 'Isso. Siga quando quiser.', 'Leia a explicação: ela mostra o que muda o resultado.', 'Resposta'], en: ['Choose an answer', 'Check', 'Choose an answer below.', 'Good. Now check it.', 'Right. Continue when ready.', 'Read the explanation: it shows what changes the result.', 'Answer'], es: ['Elige una respuesta', 'Comprobar', 'Elige una respuesta abajo.', 'Bien. Ahora compruébalo.', 'Correcto. Sigue cuando quieras.', 'Lee la explicación: muestra qué cambia el resultado.', 'Respuesta'] }[lang] || [];
+    for (const o of options) if (!feedback[o.value]) throw new Error(`Quiz ${id}: feedback missing for ${o.value}`);
+    return {
+      // The default (no answer) cannot reach the feedback step, so it is not a capture scenario.
+      id, kind: 'pratica', kicker, title, sources, initialInputs: { a: '' }, auditDefault: false,
+      controls: [{ key: 'a', type: 'choice', label: T[6], options }],
+      auditCases: [{ id: 'certa', inputs: { a: correct } }, { id: 'errada', inputs: { a: options.find(o => o.value !== correct).value } }],
+      ready: s => s.step > 0 || s.inputs.a !== '', waitLabel: T[0],
+      steps: [{ id: 'pergunta', label: '', duration: .6 }, { id: 'resposta', label: '', duration: .6, cta: T[1] }],
+      render({ state, time }) {
+        const a = state.inputs.a, e = M.enter(state.step === 0 ? time : 9, 0, .5), f = M.enter(state.step === 1 ? time : 0, .05, .5);
+        // The longest feedback is laid out invisibly before the answer, so nothing moves when it appears.
+        const longest = Object.values(feedback).reduce((x, y) => y.length > x.length ? y : x, '');
+        const fb = state.step === 1 && a ? `<p class="sc-feedback ${a === correct ? '' : 'wrong'}" style="${f.style}" data-qa-text="feedback">${esc(feedback[a])}</p>` : `<p class="sc-feedback" style="visibility:hidden" aria-hidden="true">${esc(longest)}</p>`;
+        return { html: `<div class="sc-center"><div class="sc-question" style="${e.style}"><p class="sc-say" data-qa-text="pergunta">${esc(question)}</p>${hint ? `<p class="sc-sub" data-qa-text="dica">${esc(hint)}</p>` : ''}${fb}</div></div>`, caption: state.step === 0 || !a ? (a ? T[3] : T[2]) : a === correct ? T[4] : T[5] };
+      }
+    };
+  }
+  // Summary cards: [{icon, text, sub}], entering one after another.
+  function cards(items, time) {
+    return `<div class="sc-cards">${items.map((c, n) => `<div class="sc-card" style="${M.enter(time, .1 + n * .18, .55).style}" data-qa-text="card${n}"><b aria-hidden="true">${c.icon || ''}</b><p>${c.text}</p>${c.sub ? `<span>${c.sub}</span>` : ''}</div>`).join('')}</div>`;
+  }
+  global.LessonKit = Object.freeze({ op, rise, diagram, split, hero, terminal, app, quiz, cards });
+})(window);
+
+</script><script>
+/* Guided lesson player. Inline with pack.mjs for a self-contained lesson.
+   The learner sees one primary action (Continuar) and one narration line; the
+   capture tools drive the same state through seek/nextStep/play. */
+(function (global) {
+  'use strict';
+  const clone = value => structuredClone(value);
+  const UI = {
+    'pt-BR': { next: 'Continuar', finish: 'Fim da aula', back: 'Voltar', replay: 'Rever animação', sources: 'Fontes', close: 'Fechar', answer: 'Escolha uma resposta', index: 'Progresso da aula', slide: 'Tela', keys: 'ou use → e ←', failed: 'Não foi possível preparar a aula', none: 'Esta tela não depende de fonte externa.' },
+    en: { next: 'Continue', finish: 'End of lesson', back: 'Back', replay: 'Replay animation', sources: 'Sources', close: 'Close', answer: 'Choose an answer', index: 'Lesson progress', slide: 'Screen', keys: 'or use → and ←', failed: 'The lesson could not be prepared', none: 'This screen does not rely on an external source.' },
+    es: { next: 'Continuar', finish: 'Fin de la clase', back: 'Volver', replay: 'Repetir animación', sources: 'Fuentes', close: 'Cerrar', answer: 'Elige una respuesta', index: 'Progreso de la clase', slide: 'Pantalla', keys: 'o usa → y ←', failed: 'No se pudo preparar la clase', none: 'Esta pantalla no depende de una fuente externa.' }
+  };
+  function create({ root, title, slides, sources = [], lang = 'pt-BR', resources = [] }) {
+    root = typeof root === 'string' ? document.querySelector(root) : root;
+    if (!root || !slides?.length) throw new Error('A mount element and slides are required');
+    const t = UI[lang] || UI['pt-BR'];
+    const ids = new Set();
+    slides.forEach(slide => {
+      if (!slide.id || ids.has(slide.id)) throw new Error('Slide IDs must be unique');
+      ids.add(slide.id);
+      if (typeof slide.render !== 'function' || !slide.steps?.length) throw new Error(`Invalid scene ${slide.id}`);
+      const steps = new Set();
+      slide.steps.forEach(step => {
+        if (!step.id || steps.has(step.id) || !Number.isFinite(step.duration) || step.duration < 0) throw new Error(`Invalid step in ${slide.id}`);
+        steps.add(step.id);
+      });
+      for (const id of slide.sources || []) if (!sources.some(s => s.id === id)) throw new Error(`Unknown source ${id} in ${slide.id}`);
+    });
+    const esc = global.LessonMotion.escape;
+    const $ = role => root.querySelector(`[data-player="${role}"]`);
+    let state = { slide: 0, step: 0, time: 0, inputs: {} };
+    let playing = false, sequence = false, clock = 0, raf = 0, renderedSlide = -1;
+    const drafts = new Map();
+    const media = matchMedia('(prefers-reduced-motion: reduce)');
+    root.innerHTML = `<div class="lp" data-kind="">
+<header class="lp-top"><p class="lp-course">${esc(title)}</p><nav class="lp-progress" data-player="index" aria-label="${t.index}"></nav><button class="lp-ghost" data-command="sources" aria-expanded="false">${t.sources}</button></header>
+<main class="lp-stage"><div class="lp-head"><p class="lp-kicker" data-player="chapter"></p><h1 data-player="title" data-qa-text="lesson-title"></h1></div>
+<section class="lp-scene" data-player="scene" data-qa-boundary="scene" aria-live="off"></section>
+<section class="lp-inputs" data-player="inputs"></section></main>
+<footer class="lp-bar"><button class="lp-ghost lp-back" data-command="back">← ${t.back}</button>
+<div class="lp-narration"><p data-player="caption" aria-live="polite"></p><div class="lp-dots" data-player="steps" aria-hidden="true"></div></div>
+<button class="lp-ghost lp-replay" data-command="replay" aria-label="${t.replay}" title="${t.replay}">↺</button>
+<div class="lp-go"><button class="lp-primary" data-command="continue" data-player="continue"></button><span class="lp-keys">${t.keys}</span></div></footer>
+<aside class="lp-drawer" data-player="drawer" hidden><div class="lp-drawer-head"><h2>${t.sources}</h2><button class="lp-ghost" data-command="sources">${t.close}</button></div><div data-player="sources"></div></aside></div>`;
+    $('index').innerHTML = slides.map((s, i) => `<button data-slide="${i}" aria-label="${t.slide} ${i + 1}: ${esc(s.title)}"><span></span></button>`).join('');
+    function defaults(i) { return clone(slides[i].initialInputs || {}); }
+    function normalize(i, inputs) {
+      const result = { ...defaults(i), ...clone(inputs) };
+      for (const control of slides[i].controls || []) {
+        const key = control.key;
+        if (control.type === 'range' || control.type === 'number') {
+          const value = Number(result[key]);
+          if (!Number.isFinite(value)) throw new Error(`Invalid numeric input ${key}`);
+          result[key] = Math.max(control.min, Math.min(control.max, value));
+        }
+        if (control.options && !control.options.some(o => String(o.value) === String(result[key])) && result[key] !== '') throw new Error(`Invalid option ${key}`);
+      }
+      return result;
+    }
+    function getState() { return clone(state); }
+    function duration() { return slides[state.slide].steps[state.step].duration; }
+    const lastStep = () => state.step === slides[state.slide].steps.length - 1;
+    const lastSlide = () => state.slide === slides.length - 1;
+    // A practice step may hold the learner until an answer exists: slide.ready(state) === false.
+    const blocked = () => !playing && slides[state.slide].ready?.(getState()) === false;
+    function pause() {
+      playing = false; cancelAnimationFrame(raf);
+      $('caption')?.setAttribute('aria-live', 'polite');
+      if ($('continue')) updateBar();
+    }
+    function updateBar() {
+      const slide = slides[state.slide], step = slide.steps[state.step];
+      const go = $('continue'), wait = blocked();
+      go.disabled = wait || (!playing && lastStep() && lastSlide());
+      const following = lastStep() ? null : slide.steps[state.step + 1];
+      go.textContent = wait ? (slide.waitLabel || t.answer) : !playing && !following && lastSlide() ? t.finish : `${(!playing && following?.cta) || t.next} →`;
+      root.querySelector('[data-command="back"]').disabled = state.slide === 0 && state.step === 0;
+      root.querySelector('[data-command="replay"]').hidden = !(step.duration > 0);
+    }
+    function render() {
+      const slide = slides[state.slide], step = slide.steps[state.step];
+      const context = { state: getState(), slide, step, time: state.time, progress: step.duration ? Math.min(1, state.time / step.duration) : 1, motion: global.LessonMotion };
+      const output = slide.render(context);
+      // Rebuilding the scene would reset a scrollable diagram to 0 on every frame; keep the learner's position.
+      const scrolled = renderedSlide === state.slide ? [...$('scene').querySelectorAll('[data-qa-scroll]')].map(e => [e.scrollLeft, e.scrollTop]) : [];
+      $('scene').innerHTML = typeof output === 'string' ? output : output.html;
+      $('scene').querySelectorAll('[data-qa-scroll]').forEach((e, i) => { if (scrolled[i]) [e.scrollLeft, e.scrollTop] = scrolled[i]; });
+      renderedSlide = state.slide;
+      const caption = typeof output === 'string' ? step.label : output.caption ?? step.label;
+      // Do not announce animated numeric changes dozens of times per second.
+      if ($('caption').textContent !== caption) $('caption').textContent = caption;
+      $('steps').innerHTML = slide.steps.length > 1 ? slide.steps.map((_, i) => `<i class="${i < state.step ? 'done' : i === state.step ? 'now' : ''}"></i>`).join('') : '';
+      root.querySelectorAll('[data-output]').forEach(o => { const c = (slide.controls || []).find(c => c.key === o.dataset.output); o.textContent = c.format ? c.format(state.inputs[c.key]) : `${state.inputs[c.key]}${c.unit || ''}`; });
+      root.querySelectorAll('[data-choice]').forEach(b => b.setAttribute('aria-pressed', String(String(state.inputs[b.dataset.choice]) === b.dataset.value)));
+      updateBar();
+    }
+    function mountInputs() {
+      const controls = slides[state.slide].controls || [];
+      $('inputs').hidden = !controls.length;
+      $('inputs').innerHTML = controls.map(c => {
+        const id = `input-${state.slide}-${c.key}`, value = state.inputs[c.key];
+        if (c.type === 'choice') return `<div class="lp-choices" role="group" aria-label="${esc(c.label)}"><span class="lp-label">${esc(c.label)}</span>${c.options.map(o => `<button class="lp-choice" data-choice="${esc(c.key)}" data-value="${esc(o.value)}" aria-pressed="false">${esc(o.label)}</button>`).join('')}</div>`;
+        if (c.type === 'select') return `<label class="lp-label" for="${id}">${esc(c.label)}</label><select id="${id}" data-input="${esc(c.key)}">${c.options.map(o => `<option value="${esc(o.value)}" ${String(value) === String(o.value) ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select>`;
+        if (c.type === 'textarea') return `<label class="lp-label" for="${id}">${esc(c.label)}</label><textarea id="${id}" data-input="${esc(c.key)}">${esc(value)}</textarea>`;
+        const output = c.type === 'range' ? `<output for="${id}" class="lp-value" data-output="${esc(c.key)}"></output>` : '';
+        return `<label class="lp-label" for="${id}">${esc(c.label)}</label><input id="${id}" data-input="${esc(c.key)}" type="${c.type === 'range' ? 'range' : 'number'}" min="${c.min}" max="${c.max}" step="${c.step || 1}" value="${esc(value)}">${output}`;
+      }).join('');
+    }
+    function mountSources() {
+      const own = slides[state.slide].sources || [];
+      const item = s => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.note ? `<p>${esc(s.note)}</p>` : ''}</li>`;
+      $('sources').innerHTML = `<h3>${esc(slides[state.slide].title)}</h3>${own.length ? `<ul>${sources.filter(s => own.includes(s.id)).map(item).join('')}</ul>` : `<p>${t.none}</p>`}${sources.length ? `<h3>${t.sources}</h3><ul>${sources.map(item).join('')}</ul>` : ''}`;
+    }
+    function mountSlide() {
+      const slide = slides[state.slide];
+      root.querySelector('.lp').dataset.kind = slide.kind || '';
+      root.querySelector('.lp').dataset.layout = slide.layout || 'stage';
+      $('title').textContent = slide.title;
+      $('chapter').textContent = slide.kicker || slide.chapter || '';
+      $('index').querySelectorAll('button').forEach((b, i) => { b.className = i < state.slide ? 'done' : ''; i === state.slide ? b.setAttribute('aria-current', 'step') : b.removeAttribute('aria-current'); });
+      mountInputs(); mountSources();
+    }
+    function seek(query = {}) {
+      pause();
+      const i = query.slide ?? 0;
+      if (!Number.isInteger(i) || i < 0 || i >= slides.length) throw new Error('Slide index out of range');
+      const k = query.step ?? 0;
+      if (!Number.isInteger(k) || k < 0 || k >= slides[i].steps.length) throw new Error('Step index out of range');
+      const time = query.time ?? slides[i].steps[k].duration;
+      if (!Number.isFinite(time) || time < 0) throw new Error('Invalid local time');
+      state = { slide: i, step: k, time: Math.min(time, slides[i].steps[k].duration), inputs: normalize(i, query.inputs || {}) };
+      mountSlide(); render();
+      return getState();
+    }
+    function updateInputs(patch) {
+      pause(); state.inputs = normalize(state.slide, { ...state.inputs, ...patch });
+      render(); return getState();
+    }
+    function tick(now) {
+      if (!playing) return;
+      state.time = Math.min(duration(), (now - clock) / 1000);
+      render();
+      if (state.time >= duration()) {
+        if (sequence && !lastStep()) { state.step++; state.time = 0; clock = now; }
+        else { pause(); return; }
+      }
+      raf = requestAnimationFrame(tick);
+    }
+    function start(wholeScene) {
+      sequence = wholeScene;
+      if (media.matches || duration() === 0) { state.time = duration(); pause(); render(); return; }
+      playing = true; $('caption').setAttribute('aria-live', 'off');
+      clock = performance.now() - state.time * 1000;
+      raf = requestAnimationFrame(tick);
+    }
+    function nextStep({ animate = true } = {}) {
+      pause();
+      if (lastStep()) return getState();
+      state.step++; state.time = animate && !media.matches ? 0 : duration();
+      render();
+      if (animate && !media.matches) start(false);
+      return getState();
+    }
+    function previousStep() { pause(); state.step = Math.max(0, state.step - 1); state.time = duration(); render(); return getState(); }
+    function reset() { pause(); state.step = 0; state.time = 0; render(); start(false); return getState(); }
+    function play() {
+      pause();
+      if (state.time >= duration()) {
+        if (lastStep()) { state.step = 0; state.time = 0; }
+        else { state.step++; state.time = 0; }
+      }
+      start(true);
+    }
+    function replay() { pause(); state.time = 0; render(); start(false); }
+    function goToSlide(i, { atEnd = false } = {}) {
+      i = Math.max(0, Math.min(slides.length - 1, i));
+      drafts.set(state.slide, state.inputs);
+      const step = atEnd ? slides[i].steps.length - 1 : 0;
+      seek({ slide: i, step, time: atEnd ? undefined : 0, inputs: drafts.get(i) || {} });
+      if (!atEnd) start(false); // entering a screen plays its first step, then waits
+    }
+    // The single forward action: finish a running step, else advance a step, else the next screen.
+    function proceed() {
+      if (playing) { pause(); state.time = duration(); render(); return getState(); }
+      if (blocked()) return getState();
+      if (!lastStep()) return nextStep();
+      if (!lastSlide()) goToSlide(state.slide + 1);
+      return getState();
+    }
+    function back() {
+      if (playing || state.step > 0) return previousStep();
+      if (state.slide > 0) goToSlide(state.slide - 1, { atEnd: true });
+      return getState();
+    }
+    function toggleSources(force) {
+      const drawer = $('drawer'), open = force ?? drawer.hidden;
+      drawer.hidden = !open;
+      root.querySelectorAll('[data-command="sources"]')[0].setAttribute('aria-expanded', String(open));
+    }
+    const commands = { continue: proceed, back, replay, sources: () => toggleSources(), nextStep, previousStep, reset, play, pause, previousSlide: () => goToSlide(state.slide - 1), nextSlide: () => goToSlide(state.slide + 1) };
+    root.addEventListener('click', event => {
+      const button = event.target.closest('button');
+      if (!button || !root.contains(button) || button.disabled) return;
+      if (button.dataset.slide !== undefined) goToSlide(Number(button.dataset.slide));
+      else if (button.dataset.choice) updateInputs({ [button.dataset.choice]: button.dataset.value });
+      else if (commands[button.dataset.command]) commands[button.dataset.command]();
+    });
+    root.addEventListener('input', event => {
+      const key = event.target.dataset.input;
+      if (key) updateInputs({ [key]: event.target.type === 'range' || event.target.type === 'number' ? Number(event.target.value) : event.target.value });
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !$('drawer').hidden) { toggleSources(false); return; }
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || document.querySelector('dialog[open]') || event.target.closest('input,textarea,select,[contenteditable="true"]')) return;
+      const action = { ArrowRight: proceed, ArrowLeft: back, PageDown: proceed, PageUp: back }[event.key];
+      if (action) { event.preventDefault(); action(); }
+      if (event.code === 'Space' && !event.target.closest('button,a,summary')) { event.preventDefault(); proceed(); }
+    });
+    const api = {
+      ready: false, seek, getState, updateInputs, nextStep, previousStep, reset, play, pause, replay, proceed, back,
+      get playing() { return playing; },
+      getManifest: () => ({ title, lang, sources: clone(sources), slides: slides.map(s => ({ id: s.id, kind: s.kind || '', kicker: s.kicker || s.chapter || '', title: s.title, sources: clone(s.sources || []), auditDefault: s.auditDefault !== false, steps: s.steps.map(step => ({ ...step })), initialInputs: clone(s.initialInputs || {}), auditCases: clone(s.auditCases || []) })) }),
+      getCaptureRoot: () => $('scene')
+    };
+    api.readyPromise = Promise.all([
+      document.fonts.ready,
+      ...resources.map(src => new Promise((resolve, reject) => { const image = new Image(); image.onload = resolve; image.onerror = () => reject(new Error(`Asset failed: ${src.slice(0, 100)}`)); image.src = src; }))
+    ]).then(() => { seek({ slide: 0, step: 0, time: 0 }); start(false); api.ready = true; return api; }).catch(error => { api.error = error.message; $('scene').textContent = `${t.failed}: ${error.message}`; throw error; });
+    return api;
+  }
+  global.LessonPlayer = Object.freeze({ create });
+})(window);
+
+</script><script>
+const M = LessonMotion, K = LessonKit, esc = M.escape;
+
+// ---------- Caso único (saídas reais: Express 5.3.0 + better-sqlite3 13.1.1) ----------
+const CASE = {
+  body: '{"titulo":"Duna","genero":"Ficção Científica","duracao":155,"classificacao":"14"}',
+  saved: '{"id":1,"titulo":"Duna","genero":"Ficção Científica","duracao":155,"classificacao":"14","sinopse":""}',
+  row: '1|Duna|Ficção Científica|155|14|',
+  erroDuracao: 'A duração deve ser um número inteiro de 1 a 300 minutos.'
+};
+
+// ---------- Ajudantes de desenho ----------
+// Tempo local do passo k: passos anteriores aparecem completos, posteriores ainda não existem.
+const lt = (s, t, k) => s.step > k ? 1e9 : s.step === k ? t : -1;
+const fade = (t, at, len = .45) => M.enter(t, at, len, 10);
+const txt = (cls, x, y, size, content, extra = '') => `<text class="${cls}" x="${x}" y="${y}" font-size="${size}" ${extra}>${content}</text>`;
+const node = (x, y, w, h, cls = '') => `<rect class="nd ${cls}" x="${x}" y="${y}" width="${w}" height="${h}" rx="18"/>`;
+const ring = (x, y, w, h, t, at) => { const v = M.pulse(t, at, .6); return v > .01 ? `<rect x="${x - 8 * v}" y="${y - 8 * v}" width="${w + 16 * v}" height="${h + 16 * v}" rx="${18 + 6 * v}" fill="none" stroke="var(--warm)" stroke-width="3" opacity="${(1 - .4 * v).toFixed(2)}"/>` : ''; };
+const dot = (a, b, u) => { if (u <= 0 || u >= 1) return ''; const e = M.easeInOutCubic(u); return `<circle cx="${M.lerp(a.x, b.x, e).toFixed(1)}" cy="${M.lerp(a.y, b.y, e).toFixed(1)}" r="13" fill="var(--warm)" stroke="#fff" stroke-width="3"/>`; };
+// Dois desenhos do mesmo estado: largo (desktop) e alto (celular). O CSS mostra um deles.
+const dual = (build, W, T) => K.diagram(build(W), { w: W.w, h: W.h, narrow: { body: build(T), w: T.w, h: T.h } });
+
+// Código com cores simples: strings em amarelo, palavras-chave em azul, comentários apagados.
+function hlCode(line) {
+  if (/^\s*\/\//.test(line)) return `<span class="c">${esc(line)}</span>`;
+  return line.split(/('[^']*'|`[^`]*`)/).map((part, i) => i % 2 ? `<span class="s">${esc(part)}</span>`
+    : esc(part).replace(/\b(const|if|return|function)\b/g, '<span class="k">$1</span>')).join('');
+}
+// Painel de código real do projeto. `lit` = linhas acesas neste passo; as outras ficam apagadas.
+function codePanel(lines, lit, { title = 'server.js', badge = 'código do projeto' } = {}) {
+  const body = lines.map((l, i) => `<span class="ln ${lit && !lit.includes(i) ? 'dim' : ''} ${lit && lit.includes(i) ? 'hl' : ''}">${hlCode(l) || ' '}</span>`).join('');
+  return `<div class="sc-center"><div class="mock code" data-qa-mock="código" data-qa-text="codigo"><div class="mock-bar"><i></i><i></i><i></i><span>${esc(title)}</span><em>${esc(badge)}</em></div><pre>${body}</pre></div></div>`;
+}
+
+// ---------- 1 · Gancho ----------
+const salvar = {
+  id: 'salvar', kind: 'abertura', kicker: 'Backend', title: 'O que acontece depois que você clica em Salvar?',
+  steps: [{ id: 'clicar', label: '', duration: 2.2 }, { id: 'pergunta', label: '', duration: 1.4 }],
+  render({ state, time }) {
+    const t0 = lt(state, time, 0), t1 = lt(state, time, 1);
+    const f = fade(t0, 0), press = M.pulse(t0, .7, .4), card = fade(t0, 1.3, .55);
+    const srv = fade(t1, .05), q = fade(t1, .5), qp = M.pulse(t1, .9, .5), path = M.segment(t1, .2, 1.1, M.easeInOutCubic);
+    // Formulário e card são desenhados em coordenadas próprias e posicionados com translate + scale.
+    const build = L => {
+      const { F, C, sx, sy } = L;
+      return `<g ${K.rise(f)}><g transform="translate(${F.x} ${F.y}) scale(${F.k})"><rect x="0" y="0" width="300" height="300" rx="20" fill="var(--surface)" stroke="var(--line)" stroke-width="2.5"/>
+        ${txt('lb', 28, 40, 24, 'Título')}<rect x="24" y="62" width="252" height="50" rx="10" class="row"/>${txt('tt', 42, 87, 28, 'Duna', 'data-qa-text="campo-titulo"')}
+        ${txt('lb', 28, 145, 24, 'Duração')}<rect x="24" y="167" width="252" height="50" rx="10" class="row"/>${txt('tt', 42, 192, 28, '155')}
+        <rect x="${24 - 4 * press}" y="${236 - 2 * press}" width="${252 + 8 * press}" height="${48 + 4 * press}" rx="24" fill="var(--accent)"/>${txt('tt mid', 150, 260, 26, 'Salvar', 'style="fill:#fff" data-qa-text="botao"')}</g></g>
+      <g ${K.rise(card)}><g transform="translate(${C.x} ${C.y}) scale(${C.k})"><rect x="0" y="0" width="220" height="300" rx="20" fill="var(--surface)" stroke="var(--line)" stroke-width="2.5"/>
+        <rect x="0" y="0" width="220" height="190" rx="20" fill="var(--accent-soft)"/><rect x="0" y="170" width="220" height="20" fill="var(--accent-soft)"/>
+        ${txt('tt', 22, 225, 30, 'Duna', 'data-qa-text="card"')}${txt('lb', 22, 263, 24, '155 min · 14')}</g></g>
+      <g ${K.rise(srv)}><path d="${L.path}" class="ed back" opacity="${path.toFixed(2)}"/>
+        ${node(sx, sy, 200, 90, 'dim')}${txt('lb mid', sx + 100, sy + 45, 26, 'servidor', 'data-qa-text="servidor"')}</g>
+      <g opacity="${q.opacity.toFixed(3)}"><circle cx="${L.q.x}" cy="${L.q.y}" r="${(32 + 5 * qp).toFixed(1)}" fill="var(--warm)"/>${txt('tt mid', L.q.x, L.q.y + 2, 40, '?', 'style="fill:#fff" data-qa-text="interrogacao"')}</g>`;
+    };
+    const W = { w: 900, h: 330, F: { x: 4, y: 14, k: 1 }, C: { x: 676, y: 14, k: 1 }, sx: 350, sy: 200, q: { x: 450, y: 130 }, path: 'M304 245 H350 M550 245 H676' };
+    // No celular: formulário e card lado a lado, menores; servidor embaixo, entre os dois.
+    const T = { w: 420, h: 400, F: { x: 0, y: 0, k: .75 }, C: { x: 252, y: 0, k: .75 }, sx: 110, sy: 300, q: { x: 210, y: 258 }, path: 'M112 228 V345 H110 M310 345 H334 V228' };
+    const caption = state.step === 0 ? 'Você preenche Duna no formulário e clica em Salvar. O card aparece, sem recarregar a página.'
+      : 'Mas, entre o clique e o card, o pedido foi até outro programa, o servidor, e voltou. O que aconteceu lá?';
+    return { html: dual(build, W, T), caption };
+  }
+};
+
+// ---------- 2 · Revelação: o mesmo pedido pelo terminal ----------
+const curlPost = {
+  id: 'curl', kind: 'mock', kicker: 'Na prática', title: 'O mesmo pedido, feito pelo terminal', sources: ['execucao', 'resjson'],
+  steps: [{ id: 'digitar', label: '', duration: 3.4 }, { id: 'status', label: '', duration: 1.1 }, { id: 'corpo', label: '', duration: 1.1 }],
+  render({ state, time }) {
+    const script = [
+      [{ type: true, text: 'curl -i -X POST localhost:3000/filmes \\', at: .2, cps: 34 },
+       { type: true, prompt: '> ', text: '-H "Content-Type: application/json" \\', at: 1.4, cps: 40 },
+       { type: true, prompt: '> ', text: `-d '${CASE.body}'`, at: 2.4, cps: 90 }],
+      [{ text: 'HTTP/1.1 201 Created', at: .15, cls: 'ok', hl: .5 }, { text: 'Content-Type: application/json; charset=utf-8', at: .35, cls: 'p' }],
+      [{ text: '', at: 0 }, { text: CASE.saved, at: .15, cls: 's', hl: .5 }]
+    ];
+    const caption = ['O curl manda, pelo terminal, o mesmo pedido que a página manda quando você clica em Salvar.',
+      'A primeira linha da volta é um código: 201 Created, ou seja, “criado”.',
+      'E o filme volta com "id":1. Ninguém digitou esse número: quem o criou foi o banco de dados.'][state.step];
+    return { html: K.terminal(state, time, script, { title: 'terminal', badge: 'saída real, cabeçalhos reduzidos' }), caption };
+  }
+};
+
+// ---------- 3 · Vocabulário: requisição e resposta ----------
+const partes = {
+  id: 'partes', kind: 'explicar', kicker: 'Vocabulário', title: 'Ida e volta: requisição e resposta', sources: ['mdn-status'],
+  steps: ['metodo', 'caminho', 'corpo', 'status', 'json'].map((id, n) => ({ id, label: '', duration: n ? .7 : 1.2 })),
+  render({ state, time }) {
+    const k = state.step, req = fade(lt(state, time, 0), .1), res = fade(lt(state, time, 3), .05);
+    const row = (y, i, label, value) => `<rect class="row ${k === i ? 'on' : ''}" x="16" y="${y}" width="488" height="58" rx="12"/>
+      ${txt('lb', 34, y + 29, 24, label)}${txt('tt mono', 160, y + 29, 26, esc(value), `data-qa-text="v${i}"`)}`;
+    const visual = `<svg viewBox="0 0 520 470" role="img">
+      <g ${K.rise(req)}><rect x="2" y="2" width="516" height="250" rx="22" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+        ${txt('ac', 22, 32, 22, 'REQUISIÇÃO · vai', 'letter-spacing="1"')}
+        ${row(54, 0, 'método', 'POST')}${row(120, 1, 'caminho', '/filmes')}${k >= 2 ? row(186, 2, 'corpo', '{"titulo":"Duna",…}') : ''}</g>
+      <g ${K.rise(res)}><rect x="2" y="276" width="516" height="186" rx="22" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+        ${txt('ac', 22, 306, 22, 'RESPOSTA · volta', 'letter-spacing="1"')}
+        ${row(328, 3, 'status', '201 Created')}${k >= 4 ? row(394, 4, 'corpo', '{"id":1,…}') : ''}</g>
+    </svg>`;
+    const say = 'O pedido é a <span class="nw"><span class="sc-term">requisição</span>;</span> a volta é a <span class="nw"><span class="sc-term">resposta</span>.</span>';
+    const sub = 'Os dois corpos usam <span class="sc-term">JSON</span>: o mesmo jeito de escrever objetos do JavaScript, só que como texto.';
+    const caption = ['O método diz a intenção. POST quer dizer: “crie isto”.',
+      'O caminho diz sobre o quê: /filmes, a coleção de filmes do CineMais.',
+      'O corpo leva os dados do formulário, escritos em JSON.',
+      'A resposta começa pelo status: 201 quer dizer que deu certo e algo foi criado.',
+      'Depois vem o corpo da resposta: o filme como ficou guardado, já com o id.'][k];
+    return { html: K.split({ say, sub: k >= 2 ? sub : '', visual }), caption };
+  }
+};
+
+// ---------- 4 · Vocabulário: rota ----------
+const rota = {
+  id: 'rota', kind: 'explicar', kicker: 'Vocabulário', title: 'Uma rota liga um pedido a uma função', sources: ['express'],
+  steps: [{ id: 'anatomia', label: '', duration: 1.4 }, { id: 'casar', label: '', duration: 1.6 }],
+  render({ state, time }) {
+    const t0 = lt(state, time, 0), t1 = lt(state, time, 1);
+    const a = fade(t0, .1), b = fade(t0, .4), c = fade(t0, .7);
+    // O pedido aparece em cima; uma seta desce até a rota; a rota acende quando combina.
+    const pill = fade(t1, .05), arrow = M.segment(t1, .35, 1.0, M.easeInOutCubic), ok = fade(t1, 1.05);
+    const visual = `<svg viewBox="0 0 520 400" role="img">
+      <g ${K.rise(pill)}><rect x="110" y="0" width="300" height="60" rx="30" fill="var(--warm-soft)" stroke="var(--warm)" stroke-width="3"/>
+        ${txt('tt mono mid', 260, 30, 26, 'POST /filmes', 'data-qa-text="pedido"')}
+        <path d="M260 62 V${(62 + 40 * arrow).toFixed(1)}" class="ed on" opacity="${arrow > 0 ? 1 : 0}"/></g>
+      <rect x="2" y="110" width="516" height="124" rx="18" class="nd ${state.step === 1 && arrow >= 1 ? 'on' : ''}"/>
+      ${txt('tt mono', 26, 150, 27, "app.post('/filmes',", 'data-qa-text="codigo-rota"')}${txt('tt mono', 58, 196, 27, '(req, res) => {…})')}
+      <g ${K.rise(a)}>${txt('lb', 26, 272, 22, '1ª linha: o método e o caminho', 'data-qa-text="linha1"')}</g>
+      <g ${K.rise(b)}>${txt('lb', 26, 308, 22, '2ª linha: a função que roda', 'data-qa-text="linha2"')}</g>
+      <g opacity="${ok.opacity.toFixed(3)}">${txt('ok', 26, 368, 24, '✓ combina: o Express chama a função', 'data-qa-text="combina"')}</g>
+    </svg>`;
+    const say = 'Uma <span class="sc-term">rota</span> é um método + um caminho + a função que responde.';
+    const sub = 'Quem confere as rotas é o <span class="sc-term">Express</span>, a biblioteca do Node que recebe os pedidos no servidor.';
+    const caption = state.step === 0 ? 'app.post(\'/filmes\', …) quer dizer: quando chegar um POST em /filmes, rode esta função.'
+      : 'O Express compara cada pedido com as rotas. POST /filmes combina com esta, então ele chama a função.';
+    return { html: K.split({ say, sub, visual }), caption };
+  }
+};
+
+// ---------- 5 · Modelo: as quatro rotas do CRUD ----------
+const ROTAS = [
+  { m: 'GET', p: '/filmes', sql: 'SELECT', faz: 'lista' },
+  { m: 'POST', p: '/filmes', sql: 'INSERT', faz: 'cadastra' },
+  { m: 'PUT', p: '/filmes/:id', sql: 'UPDATE', faz: 'edita' },
+  { m: 'DELETE', p: '/filmes/:id', sql: 'DELETE', faz: 'exclui' }
+];
+const crud = {
+  id: 'crud', kind: 'diagrama', kicker: 'O modelo', title: 'Quatro rotas, quatro comandos no banco', sources: ['express', 'bsqlite'],
+  steps: ROTAS.map((r, n) => ({ id: r.m.toLowerCase(), label: '', duration: n ? .8 : 1.3 })).concat([{ id: 'crud', label: '', duration: .8 }]),
+  render({ state, time }) {
+    const k = state.step, all = k === 4;
+    const build = L => ROTAS.map((r, i) => {
+      const e = fade(lt(state, time, 0), .1 + i * .12), lit = k === i || all, seen = k >= i || all;
+      const y = L.y0 + i * L.gap;
+      if (L.narrow) return `<g ${K.rise(e)}><rect class="row ${k === i ? 'on' : ''}" x="0" y="${y}" width="420" height="${L.gap - 14}" rx="14"/>
+        ${txt('tt mono', 18, y + 30, 22, r.m, `data-qa-text="m${i}"`)}${txt('lb mono', 140, y + 30, 20, r.p)}
+        <g opacity="${seen ? 1 : .25}">${txt('ac mono', 18, y + 70, 22, `→ ${r.sql}`)}${txt('lb', 200, y + 70, 20, r.faz)}</g></g>`;
+      return `<g ${K.rise(e)}><rect class="row ${k === i ? 'on' : ''}" x="0" y="${y}" width="1060" height="${L.gap - 16}" rx="16"/>
+        ${txt('tt mono', 30, y + 38, 28, r.m, `data-qa-text="m${i}"`)}${txt('tt mono', 190, y + 38, 28, r.p)}
+        <g opacity="${seen ? 1 : .22}"><path d="M480 ${y + 38} H600" class="ed ${lit && !all ? 'on' : ''}"/><path d="M588 ${y + 28} L602 ${y + 38} L588 ${y + 48}" class="ed ${lit && !all ? 'on' : ''}"/>
+        <rect x="630" y="${y + 12}" width="170" height="52" rx="12" fill="var(--accent-soft)"/>${txt('ac mono mid', 715, y + 38, 26, r.sql, `data-qa-text="sql${i}"`)}
+        ${txt('lb', 840, y + 38, 26, r.faz)}</g></g>`;
+    }).join('') + (L.narrow ? '' : `<g opacity="${all ? 1 : 0}">${txt('ac', 0, L.y0 + 4 * L.gap + 22, 26, 'C de create · R de read · U de update · D de delete  =  CRUD', 'data-qa-text="crud"')}</g>`);
+    const caption = ['GET /filmes lista os filmes. No banco, isso vira um SELECT na tabela.',
+      'POST /filmes cadastra um filme novo. No banco, vira um INSERT.',
+      'PUT /filmes/:id edita. O :id é a parte que muda: /filmes/1 edita o filme de id 1.',
+      'DELETE /filmes/:id exclui. /filmes/1 apaga o filme de id 1.',
+      'Quatro rotas, quatro comandos. Juntas, elas são o CRUD que o enunciado pede.'][k];
+    return { html: dual(build, { w: 1060, h: 470, y0: 0, gap: 104 }, { w: 420, h: 440, y0: 0, gap: 110, narrow: true }), caption };
+  }
+};
+
+// ---------- 6 · Vocabulário: req e res ----------
+const reqres = {
+  id: 'reqres', kind: 'explicar', kicker: 'Vocabulário', title: 'A função recebe o pedido e monta a resposta', sources: ['express', 'resjson'],
+  steps: [{ id: 'req', label: '', duration: 1.2 }, { id: 'params', label: '', duration: .8 }, { id: 'res', label: '', duration: 1 }],
+  render({ state, time }) {
+    const k = state.step, a = fade(lt(state, time, 0), .1), b = fade(lt(state, time, 1), .1), c = fade(lt(state, time, 2), .1);
+    const visual = `<svg viewBox="0 0 520 450" role="img">
+      <rect x="110" y="150" width="300" height="96" rx="18" class="nd"/>${txt('tt mono mid', 260, 198, 25, '(req, res) => {…}', 'data-qa-text="funcao"')}
+      <g ${K.rise(a)}><rect class="row ${k === 0 ? 'on' : ''}" x="0" y="0" width="250" height="110" rx="14"/>
+        ${txt('ac mono', 18, 34, 25, 'req.body')}${txt('lb mono', 18, 78, 20, '{ titulo: "Duna" }', 'data-qa-text="body"')}
+        <path d="M125 110 L190 150" class="ed ${k === 0 ? 'on' : ''}"/></g>
+      <g ${K.rise(b)}><rect class="row ${k === 1 ? 'on' : ''}" x="270" y="0" width="250" height="110" rx="14"/>
+        ${txt('ac mono', 288, 34, 25, 'req.params.id')}${txt('lb', 288, 78, 20, 'em /filmes/1: "1"', 'data-qa-text="params"')}
+        <path d="M395 110 L330 150" class="ed ${k === 1 ? 'on' : ''}"/></g>
+      <g ${K.rise(c)}><path d="M260 246 V284" class="ed ${k === 2 ? 'on' : ''}"/><rect class="row ${k === 2 ? 'on' : ''}" x="0" y="284" width="520" height="160" rx="14"/>
+        ${txt('ac mono', 22, 324, 25, 'res.status(201).json(filme)', 'data-qa-text="res"')}
+        ${txt('lb', 22, 370, 21, 'status(201) escolhe o código')}${txt('lb', 22, 408, 21, 'json(filme) envia o corpo em JSON')}</g>
+    </svg>`;
+    const say = '<span class="sc-term">req</span> é o pedido que chegou; <span class="sc-term">res</span> é a resposta que vai sair.';
+    const caption = ['req.body traz o JSON do formulário já como objeto JavaScript: req.body.titulo vale "Duna".',
+      'req.params traz as partes variáveis do caminho. Em PUT /filmes/1, req.params.id vale "1", como texto.',
+      'res.status(201).json(filme) escolhe o código e envia o filme em JSON. Cada pedido recebe uma única resposta.'][k];
+    return { html: K.split({ say, visual }), caption };
+  }
+};
+
+// ---------- 7 · Vocabulário: banco e tabela ----------
+const COLS = ['id', 'titulo', 'genero', 'duracao', 'classificacao'], VALS = ['1', 'Duna', 'Ficção Científica', '155', '14'];
+const banco = {
+  id: 'banco', kind: 'explicar', kicker: 'Vocabulário', title: 'O banco é um arquivo que só o servidor abre', sources: ['bsqlite', 'sqlite-auto'],
+  steps: [{ id: 'arquivo', label: '', duration: 1.2 }, { id: 'tabela', label: '', duration: 1.2 }],
+  render({ state, time }) {
+    const f = fade(lt(state, time, 0), .1), tb = lt(state, time, 1), head = fade(tb, .1), line = fade(tb, .6);
+    const file = (w, h, ear) => `<path d="M2 2 H${w - ear} L${w - 2} ${ear} V${h - 2} H2 Z" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M${w - ear} 2 V${ear} H${w - 2}" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;
+    // Desktop: a tabela em colunas. Celular: a mesma linha, um campo por linha (cabe sem letra miúda).
+    const CW = [50, 100, 220, 96];
+    const build = L => L.narrow
+      ? `<g ${K.rise(f)}>${file(420, 440, 80)}${txt('tt mono', 26, 50, 30, 'filmes.db', 'data-qa-text="arquivo"')}${txt('lb', 26, 92, 20, 'arquivo no disco')}</g>
+        <g ${K.rise(head)}>${txt('ac', 26, 142, 21, 'tabela filmes · linha de id 1')}</g>
+        <g ${K.rise(line)}>${COLS.map((c, i) => `<rect class="row ${state.step === 1 && i === 1 ? 'on' : ''}" x="20" y="${166 + i * 50}" width="380" height="42" rx="10"/>
+          ${txt('ac mono', 34, 187 + i * 50, 18, c, i === 1 ? 'data-qa-text="colunas"' : '')}${txt('tt mono', 196, 187 + i * 50, 18, VALS[i], i === 1 ? 'data-qa-text="linha"' : '')}`).join('')}</g>`
+      : `<g ${K.rise(f)}>${file(540, 420, 96)}${txt('tt mono', 30, 52, 30, 'filmes.db', 'data-qa-text="arquivo"')}${txt('lb', 30, 96, 21, 'arquivo no disco, ao lado do server.js')}</g>
+        <g ${K.rise(head)}>${txt('ac', 30, 160, 21, 'tabela filmes')}<rect x="20" y="182" width="500" height="54" rx="10" fill="var(--accent-soft)"/>
+          ${COLS.slice(0, 4).map((c, i) => txt('ac mono', 34 + CW.slice(0, i).reduce((a, b) => a + b, 0), 209, 19, c, i === 1 ? 'data-qa-text="colunas"' : '')).join('')}${txt("ac mono", 494, 209, 19, "…")}
+          ${txt('lb', 30, 380, 21, 'uma coluna por campo · uma linha por filme')}</g>
+        <g ${K.rise(line)}><rect class="row ${state.step === 1 ? 'on' : ''}" x="20" y="248" width="500" height="54" rx="10"/>
+          ${VALS.slice(0, 4).map((v, i) => txt('tt mono', 34 + CW.slice(0, i).reduce((a, b) => a + b, 0), 275, 19, v, i === 1 ? 'data-qa-text="linha"' : '')).join('')}${txt("tt mono", 494, 275, 19, "…")}</g>`;
+    const visual = dual(build, { w: 540, h: 420 }, { w: 420, h: 440, narrow: true });
+    const say = 'O <span class="sc-term">SQLite</span> guarda tudo num arquivo só: filmes.db.';
+    const read = 'O navegador nunca abre esse arquivo. Ele só conversa com as rotas, e as rotas é que falam com o banco. É isso que o enunciado quer dizer com “somente o backend acessa o banco”. No projeto, quem abre o arquivo é o db.js, usando a biblioteca better-sqlite3.';
+    const caption = state.step === 0 ? 'O banco SQLite é um arquivo, filmes.db. Só o servidor o abre; a página nunca toca nele.'
+      : 'Dentro do arquivo, a tabela filmes tem uma coluna por campo e uma linha por filme. Duna é a linha de id 1.';
+    return { html: K.split({ say, read, visual }), caption };
+  }
+};
+
+// ---------- 8 · Mecanismo no código: a rota POST ----------
+const POST_CODE = [
+  "app.post('/filmes', (req, res) => {",
+  '  const erro = validarFilme(req.body);',
+  '  if (erro) return res.status(400).json({ erro });',
+  '',
+  '  const { titulo, genero, duracao, classificacao, sinopse } = req.body;',
+  '  const info = db.prepare(',
+  "    'INSERT INTO filmes (titulo, genero, duracao, classificacao, sinopse) VALUES (?, ?, ?, ?, ?)'",
+  "  ).run(titulo.trim(), genero, duracao, classificacao, sinopse || '');",
+  '',
+  "  const filme = db.prepare('SELECT * FROM filmes WHERE id = ?').get(info.lastInsertRowid);",
+  '  res.status(201).json(filme);',
+  '});'
+];
+const codigo = {
+  id: 'codigo', kind: 'mock', kicker: 'No código', title: 'A rota POST inteira, em três blocos', sources: ['express', 'bsqlite'],
+  steps: [{ id: 'validar', label: '', duration: .6 }, { id: 'insert', label: '', duration: .5 }, { id: 'responder', label: '', duration: .5 }],
+  render({ state }) {
+    const lit = [[1, 2], [4, 5, 6, 7], [9, 10]][state.step];
+    const caption = ['Primeiro, valida req.body. Se houver erro, responde 400 e o return para a função ali mesmo.',
+      'Com os dados certos, o INSERT grava o filme. Cada ? recebe um valor do .run(), na mesma ordem.',
+      'Por fim, lê o filme gravado pelo id novo (lastInsertRowid) e responde 201 com ele em JSON.'][state.step];
+    return { html: codePanel(POST_CODE, lit), caption };
+  }
+};
+
+// ---------- 9 · Mecanismo: o fluxo completo do Salvar ----------
+const FLUXO = ['Página', 'Express', 'validarFilme', 'Banco'];
+const fluxo = {
+  id: 'fluxo', kind: 'diagrama', kicker: 'O mecanismo', title: 'O caminho do Salvar, etapa por etapa', sources: ['express', 'expressjson', 'bsqlite'],
+  steps: [{ id: 'clique', label: '', duration: 1.2 }, { id: 'rota', label: '', duration: 1.5 }, { id: 'json', label: '', duration: .8 },
+    { id: 'validar', label: '', duration: 1.5 }, { id: 'banco', label: '', duration: 1.5 }, { id: 'resposta', label: '', duration: 1.8 }, { id: 'card', label: '', duration: .8 }],
+  render({ state, time }) {
+    const k = state.step, active = [0, 1, 1, 2, 3, 0, 0][k];
+    // Notas que ficam como rastro embaixo de cada peça.
+    const NOTES = [{ at: 0, node: 0, text: 'fetch envia' }, { at: 1, node: 1, text: 'rota POST /filmes' }, { at: 2, node: 1, text: 'req.body pronto' },
+      { at: 3, node: 2, text: 'nenhum erro' }, { at: 4, node: 3, text: 'INSERT → id 1' }, { at: 5, node: 0, text: '201 + JSON' }, { at: 6, node: 0, text: 'card desenhado' }];
+    const build = L => {
+      const P = i => L.pos(i);
+      let s = '';
+      // Ida: arestas entre as peças. Volta: caminho tracejado do banco até a página.
+      for (let i = 0; i < 3; i++) { const a = P(i), b = P(i + 1); s += `<path d="${L.edge(a, b)}" class="ed ${k >= 1 && k <= 4 && active === i + 1 ? 'on' : ''}"/>`; }
+      s += `<path d="${L.back}" class="ed back ${k === 5 ? 'on' : ''}" opacity="${k >= 5 ? 1 : .35}"/>`;
+      FLUXO.forEach((name, i) => {
+        const p = P(i), e = fade(lt(state, time, 0), .1 + i * .12), on = active === i && k !== 6 || (k === 6 && i === 0);
+        s += `<g ${K.rise(e)}>${node(p.x - L.bw / 2, p.y - L.bh / 2, L.bw, L.bh, on ? 'on' : '')}${txt('tt mid', p.x, p.y, L.fs, name, `data-qa-text="n${i}"`)}</g>`;
+      });
+      // Rastro: a última nota de cada peça (até o passo atual).
+      FLUXO.forEach((_, i) => {
+        const mine = NOTES.filter(n => n.node === i && n.at <= k), last = mine[mine.length - 1];
+        if (!last) return;
+        // A nota entra quando a mensagem chega (e termina antes do fim do passo).
+        const e = fade(lt(state, time, last.at), [.6, 1.0, .2, 1.0, 1.0, 1.3, .2][last.at]), p = L.note(i);
+        s += `<text class="${last.at === k ? 'wm' : 'ac'} ${L.anchor}" x="${p.x}" y="${p.y + e.y}" font-size="${L.ls}" opacity="${e.opacity.toFixed(3)}" data-qa-text="nota${i}">${last.text}</text>`;
+      });
+      // A mensagem em trânsito (posição = função do tempo local).
+      const go = (i, j, at, len) => dot(L.port(i, 'out'), L.port(j, 'in'), M.segment(time, at, at + len));
+      if (k === 1) s += go(0, 1, .1, 1.0);
+      if (k === 3) s += go(1, 2, .1, 1.0);
+      if (k === 4) s += go(2, 3, .1, 1.0);
+      if (k === 5) { const u = M.segment(time, .1, 1.3); if (u > 0 && u < 1) { const q = L.backAt(M.easeInOutCubic(u)); s += `<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="13" fill="var(--warm)" stroke="#fff" stroke-width="3"/>`; } }
+      const cnt = `etapa ${Math.min(k, 6)} de 6`;
+      s += txt('lb', L.cx, L.cy, L.ls, k === 0 ? 'início' : cnt, `data-qa-text="contador" ${L.narrow ? 'text-anchor="end"' : ''}`);
+      return s;
+    };
+    const W = {
+      w: 1100, h: 360, bw: 220, bh: 100, fs: 28, ls: 24, anchor: 'mid', cx: 0, cy: 345,
+      pos: i => ({ x: 120 + i * 286, y: 90 }), note: i => ({ x: 120 + i * 286, y: 172 }),
+      port: (i, side) => ({ x: 120 + i * 286 + (side === 'out' ? 110 : -110), y: 90 }),
+      edge: (a, b) => `M${a.x + 110} ${a.y} H${b.x - 110}`,
+      back: 'M978 200 V260 Q978 285 953 285 H145 Q120 285 120 260 V205',
+      backAt: u => ({ x: M.lerp(978, 120, u), y: 285 })
+    };
+    const T = {
+      w: 420, h: 600, bw: 210, bh: 84, fs: 26, ls: 20, anchor: '', cx: 410, cy: 582, narrow: true,
+      pos: i => ({ x: 125, y: 52 + i * 150 }), note: i => ({ x: 240, y: 52 + i * 150 }),
+      port: (i, side) => ({ x: 125, y: 52 + i * 150 + (side === 'out' ? 42 : -42) }),
+      edge: (a, b) => `M${a.x} ${a.y + 42} V${b.y - 42}`,
+      back: 'M20 502 V52',
+      backAt: u => ({ x: 20, y: M.lerp(502, 52, u) })
+    };
+    const caption = ['Você clica em Salvar. O JavaScript da página monta o JSON e o envia com fetch, a função que faz pedidos sem recarregar.',
+      'O pedido chega ao Express, que encontra a rota POST /filmes.',
+      'Antes da função, o express.json() lê o texto JSON e o transforma no objeto req.body.',
+      'validarFilme confere cada campo de req.body. Duna passa em todas as regras: nenhum erro.',
+      'O INSERT grava a linha no filmes.db, e o banco devolve o id novo: 1.',
+      'O servidor responde 201 com o filme em JSON. A resposta volta até a página.',
+      'O JavaScript da página lê o JSON e desenha o card. Foram 6 etapas, e a página não recarregou.'][k];
+    return { html: dual(build, W, T), caption };
+  }
+};
+
+// ---------- 10 · Prova real: o banco guardou mesmo ----------
+const sqlite = {
+  id: 'sqlite', kind: 'mock', kicker: 'Prova real', title: 'A linha está mesmo no arquivo', sources: ['execucao'],
+  steps: [{ id: 'select', label: '', duration: 2 }, { id: 'get', label: '', duration: 1.6 }],
+  render({ state, time }) {
+    const script = [
+      [{ type: true, text: 'sqlite3 filmes.db "SELECT * FROM filmes;"', at: .2, cps: 32 }, { text: CASE.row, at: 1.6, cls: 's', hl: 1.75 }],
+      [{ text: '', at: 0 }, { type: true, text: 'curl localhost:3000/filmes', at: .1, cps: 30 }, { text: `[${CASE.saved}]`, at: 1.1, cls: 's', hl: 1.25 }]
+    ];
+    const caption = state.step === 0 ? 'O sqlite3 abre o mesmo filmes.db. Ali está a linha que o INSERT gravou, com o id 1 e as colunas separadas por |.'
+      : 'E o GET /filmes devolve essa mesma linha, agora em JSON, dentro de uma lista. É com ela que a página monta os cards.';
+    return { html: K.terminal(state, time, script, { title: 'terminal', badge: 'saída real' }), caption };
+  }
+};
+
+// ---------- 11 · Prática: prever ----------
+const prever = K.quiz({
+  id: 'prever', kicker: 'Sua vez · prever', title: 'Qual status volta?', sources: ['mdn-status'],
+  question: 'Chega POST /filmes com {"titulo":"Up", "genero":"Animação", "duracao":96, "classificacao":"L"}. Qual status volta?',
+  hint: 'Confira cada regra: título de 2 a 100 caracteres, duração de 1 a 300.',
+  correct: '201', options: [{ value: '201', label: '201 Created' }, { value: '400', label: '400 Bad Request' }, { value: '200', label: '200 OK' }],
+  feedback: {
+    '201': 'Isso. "Up" tem 2 caracteres, e a regra aceita de 2 a 100. Com 96 minutos e gênero e classificação da lista, nada falha: o INSERT grava e a rota responde 201.',
+    '400': 'O título "Up" parece curto, mas tem exatamente 2 caracteres, e a regra aceita de 2 a 100. Nenhuma regra falha, então o filme é gravado e volta 201.',
+    '200': '200 é o status de quem só leu ou editou. Um POST que cria um filme novo responde 201 Created, como no cadastro de Duna.'
+  }
+});
+
+// ---------- 12 · Segunda volta: o curl pula o formulário ----------
+const burlar = {
+  id: 'burlar', kind: 'mock', kicker: 'Validação', title: 'O formulário não é a única porta', sources: ['execucao'],
+  steps: [{ id: 'enviar', label: '', duration: 3 }, { id: 'resposta', label: '', duration: 1.1 }, { id: 'lista', label: '', duration: 1.6 }],
+  render({ state, time }) {
+    const bad = '{"titulo":"Duna","genero":"Ficção Científica","duracao":0,"classificacao":"14"}';
+    const script = [
+      [{ type: true, text: 'curl -i -X POST localhost:3000/filmes \\', at: .2, cps: 40 },
+       { type: true, prompt: '> ', text: '-H "Content-Type: application/json" \\', at: 1.2, cps: 44 },
+       { type: true, prompt: '> ', text: `-d '${bad}'`, at: 2.1, cps: 100 }],
+      [{ text: 'HTTP/1.1 400 Bad Request', at: .15, cls: 'warn', hl: .4 }, { text: '', at: .3 }, { text: `{"erro":"${CASE.erroDuracao}"}`, at: .45, cls: 's' }],
+      [{ text: '', at: 0 }, { type: true, text: 'curl localhost:3000/filmes', at: .1, cps: 30 }, { text: `[${CASE.saved}]`, at: 1.1, cls: 's', hl: 1.25 }]
+    ];
+    const caption = ['O curl não passa pelo formulário. Aqui ele manda duração 0 direto para o servidor.',
+      'O servidor recusa: 400 Bad Request e uma mensagem dizendo qual campo está errado.',
+      'E nada foi gravado: a lista continua só com Duna. Por isso o servidor valida de novo, mesmo com o formulário validando.'][state.step];
+    return { html: K.terminal(state, time, script, { title: 'terminal', badge: 'saída real, cabeçalhos reduzidos' }), caption };
+  }
+};
+
+// ---------- 13 · Mecanismo da validação (interativo) ----------
+const REGRAS = [
+  { campo: 'titulo', regra: 'texto de 2 a 100 caracteres', ok: i => i.titulo.length >= 2 },
+  { campo: 'genero', regra: 'um gênero da lista', ok: () => true },
+  { campo: 'duracao', regra: 'inteiro de 1 a 300', ok: i => i.duracao >= 1 && i.duracao <= 300 },
+  { campo: 'classificacao', regra: 'L, 10, 12, 14, 16 ou 18', ok: () => true },
+  { campo: 'sinopse', regra: 'opcional, até 500', ok: () => true }
+];
+const MSG = { titulo: 'O título deve ter de 2 a 100 caracteres.', duracao: CASE.erroDuracao };
+const validar = {
+  id: 'validar', kind: 'diagrama', kicker: 'O mecanismo', title: 'validarFilme confere as regras em ordem', sources: ['execucao'],
+  initialInputs: { titulo: 'Duna', duracao: 0 },
+  controls: [{ key: 'titulo', type: 'choice', label: 'título', options: [{ value: 'Duna', label: '"Duna"' }, { value: 'D', label: '"D"' }] },
+    { key: 'duracao', type: 'range', label: 'duração', min: 0, max: 320, step: 1, format: v => `${v} min` }],
+  auditCases: [{ id: 'valido', inputs: { titulo: 'Duna', duracao: 155 } }, { id: 'titulo', inputs: { titulo: 'D', duracao: 0 } }, { id: 'acima', inputs: { titulo: 'Duna', duracao: 320 } }],
+  steps: [{ id: 'regras', label: '', duration: 1 }, { id: 'conferir', label: '', duration: 2.6 }, { id: 'resposta', label: '', duration: .7 }],
+  render({ state, time }) {
+    const inp = state.inputs, k = state.step;
+    // Modelo: índice da primeira regra que falha (ou -1).
+    const fail = REGRAS.findIndex(r => !r.ok(inp)), stop = fail === -1 ? REGRAS.length - 1 : fail;
+    const checked = k === 0 ? -1 : k === 1 ? Math.min(stop, Math.floor(M.segment(time, .2, 2.4, M.linear) * (stop + 1)) - 1) : stop;
+    const erro = fail === -1 ? null : MSG[REGRAS[fail].campo];
+    const build = L => {
+      let s = '';
+      REGRAS.forEach((r, i) => {
+        const y = i * L.gap, e = fade(lt(state, time, 0), .05 + i * .1), done = i <= checked, bad = done && i === fail, skipped = k >= 1 && i > stop && checked >= stop;
+        const cur = k === 1 && i === checked + 1 && i <= stop;
+        s += `<g ${K.rise(e)} opacity="${skipped ? .35 : 1}"><rect class="row ${cur ? 'on' : ''}" x="0" y="${y}" width="${L.w}" height="${L.gap - 12}" rx="14"/>
+          ${txt('ac mono', 20, y + L.ty, L.fs, r.campo, `data-qa-text="campo${i}"`)}${txt('lb', L.rx, y + L.ry, L.fs, r.regra)}
+          ${done ? txt(bad ? 'no mid' : 'ok mid', L.w - 40, y + L.ty, 30, bad ? '✗' : '✓', `data-qa-text="marca${i}"`) : skipped ? txt('lb', L.w - 20, y + L.ty, L.fs - 2, 'não conferida', 'text-anchor="end"') : ''}</g>`;
+      });
+      const res = fade(lt(state, time, 2), .05), y = REGRAS.length * L.gap + 6;
+      s += `<g ${K.rise(res)}><rect x="0" y="${y}" width="${L.w}" height="${L.resH}" rx="14" fill="${erro ? 'var(--bad-soft)' : 'var(--good-soft)'}"/>
+        ${txt(erro ? 'no mono' : 'ok mono', 20, y + 34, L.fs + 2, erro ? '400 Bad Request' : '201 Created', 'data-qa-text="status"')}
+        ${txt('lb', 20, y + 76, L.fs - 2, erro ? esc(L.short ? erro.replace('A duração deve ser um número inteiro de', 'duração: inteiro de') : erro) : 'nenhum erro: segue para o INSERT', 'data-qa-text="erro"')}</g>`;
+      return s;
+    };
+    const W = { w: 1000, h: 5 * 78 + 6 + 104, gap: 78, ty: 33, ry: 33, rx: 260, fs: 24, resH: 104 };
+    const T = { w: 420, h: 5 * 92 + 6 + 104, gap: 92, ty: 28, ry: 62, rx: 20, fs: 20, resH: 104, short: true };
+    const nome = `título "${inp.titulo}", duração ${inp.duracao}`;
+    const caption = k === 0 ? `Escolha um título e uma duração. O corpo agora tem ${nome}.`
+      : k === 1 ? 'validarFilme confere uma regra por vez, de cima para baixo.'
+      : erro ? `A regra de ${REGRAS[fail].campo} falhou. validarFilme para no primeiro problema e devolve só essa mensagem; a rota responde 400.`
+      : 'Todas as regras passaram: validarFilme devolve null, e a rota segue para o INSERT e responde 201.';
+    return { html: dual(build, W, T), caption };
+  }
+};
+
+// ---------- 14 · Vocabulário: códigos de status ----------
+const STATUS = [
+  { c: '200', n: 'OK', u: 'GET e PUT deram certo', g: 0 }, { c: '201', n: 'Created', u: 'POST criou o filme', g: 0 }, { c: '204', n: 'No Content', u: 'DELETE apagou; sem corpo', g: 0 },
+  { c: '400', n: 'Bad Request', u: 'dados inválidos', g: 1 }, { c: '404', n: 'Not Found', u: 'esse id não existe', g: 1 }
+];
+const status = {
+  id: 'status', kind: 'explicar', kicker: 'Vocabulário', title: 'O primeiro algarismo já diz quem errou', sources: ['mdn-status'],
+  steps: [{ id: 'sucesso', label: '', duration: 1.2 }, { id: 'erro', label: '', duration: 1.1 }],
+  render({ state, time }) {
+    // A cor de fundo diz o grupo (verde = 2xx, vermelho claro = 4xx); o texto fica neutro.
+    const visual = `<svg viewBox="0 0 520 470" role="img">${STATUS.map((s, i) => {
+      const e = fade(lt(state, time, s.g), .1 + (i % 3) * .14), y = i * 86 + (s.g ? 40 : 0), lit = state.step === s.g;
+      return `<g ${K.rise(e)}><rect x="0" y="${y}" width="520" height="72" rx="14" fill="${s.g ? 'var(--bad-soft)' : 'var(--good-soft)'}" opacity="${lit ? 1 : .55}"/>
+        ${txt('tt mono', 18, y + 36, 28, s.c, `data-qa-text="c${s.c}"`)}${txt('tt', 90, y + 36, 21, s.n)}${txt('lb', 250, y + 36, 19, s.u)}</g>`;
+    }).join('')}</svg>`;
+    const say = 'O <span class="sc-term">status</span> resume o resultado num número de três algarismos.';
+    const read = 'Começa com 2: deu certo. Começa com 4: o problema está no pedido, e quem pediu precisa corrigir. Começa com 5: o problema está no próprio servidor, como o 500 que aparece quando o código quebra. Na tela, o JavaScript olha esse número para decidir se mostra o card ou a mensagem de erro.';
+    const caption = state.step === 0 ? 'Os do grupo 2 são de sucesso. Repare no 204: depois de excluir, não há nada para devolver no corpo.'
+      : 'Os do grupo 4 dizem que o pedido tem um problema: 400 para dados inválidos, 404 para um id que não existe.';
+    return { html: K.split({ say, read, visual }), caption };
+  }
+};
+
+// ---------- 15 · Mecanismo: :id, changes e 404 ----------
+const naoExiste = {
+  id: 'naoexiste', kind: 'diagrama', kicker: 'O mecanismo', title: 'Como o servidor descobre que o id não existe', sources: ['bsqlite'],
+  steps: [{ id: 'pedido', label: '', duration: 1.1 }, { id: 'procura', label: '', duration: 1.6 }, { id: 'responde', label: '', duration: .8 }, { id: 'outro', label: '', duration: 1.6 }],
+  render({ state, time }) {
+    const k = state.step, id = k === 3 ? 1 : 7;
+    const scan = k === 1 || k === 3 ? M.segment(time, .1, 1.0) : k > 1 ? 1 : 0;
+    const gone = k === 3 ? M.segment(time, 1.1, 1.5) : 0;
+    const changes = k === 3 ? (time >= 1.1 ? 1 : '…') : k >= 1 ? (scan >= 1 ? 0 : '…') : '…';
+    const build = L => {
+      const e0 = fade(lt(state, time, 0), .05), r = fade(lt(state, time, 2), .05);
+      const req = `<g ${K.rise(e0)}><rect x="0" y="0" width="${L.w}" height="64" rx="32" fill="var(--warm-soft)" stroke="var(--warm)" stroke-width="3"/>
+        ${txt('tt mono mid', L.w / 2, 32, L.fs, `DELETE /filmes/${id}`, 'data-qa-text="pedido"')}</g>`;
+      const sql = `<g ${K.rise(e0)}>${txt('ac mono', 0, 112, L.fs - 2, `DELETE FROM filmes WHERE id = ${id}`, 'data-qa-text="sql"')}</g>`;
+      const rowY = 150, hit = k === 3 && scan >= 1;
+      const table = `<g ${K.rise(e0)}><rect x="0" y="${rowY}" width="${L.w}" height="60" rx="12" class="row ${hit ? 'on' : ''}" opacity="${(1 - gone).toFixed(2)}"/>
+        <g opacity="${(1 - gone).toFixed(2)}">${txt('tt mono', 20, rowY + 30, L.fs - 2, '1 · Duna · 155 · 14', 'data-qa-text="linha1"')}</g>
+        ${txt('lb', 20, rowY + 92, L.fs - 4, k === 3 && gone >= 1 ? 'a tabela ficou vazia' : 'a tabela só tem o filme 1')}
+        ${scan > 0 && scan < 1 ? `<rect x="0" y="${rowY - 4}" width="${(L.w * scan).toFixed(1)}" height="68" rx="12" fill="none" stroke="var(--warm)" stroke-width="3"/>` : ''}</g>`;
+      const ch = `<g opacity="${k >= 1 ? 1 : 0}">${txt('tt mono', 0, L.chY, L.fs, `info.changes = ${changes}`, 'data-qa-text="changes"')}</g>`;
+      // Resposta em duas linhas: o status e, embaixo, o corpo (ou a falta dele).
+      const resp = k >= 2 ? `<g ${K.rise(k === 3 ? fade(time, 1.2) : r)}><rect x="0" y="${L.chY + 30}" width="${L.w}" height="104" rx="14" fill="${k === 3 ? 'var(--good-soft)' : 'var(--bad-soft)'}"/>
+        ${txt(k === 3 ? 'ok mono' : 'no mono', 20, L.chY + 62, L.fs, k === 3 ? '204 No Content' : '404 Not Found', 'data-qa-text="resposta"')}
+        ${txt('lb mono', 20, L.chY + 104, L.fs - 4, k === 3 ? 'sem corpo' : '{"erro":"Filme não encontrado."}', 'data-qa-text="resposta-corpo"')}</g>` : '';
+      return req + sql + table + ch + resp;
+    };
+    const caption = ['Chega DELETE /filmes/7. A rota pega o 7 de req.params.id e monta o DELETE com ele.',
+      'O banco procura uma linha com id 7 e não acha. Nada é apagado, e o .run() conta isso em info.changes: 0.',
+      'changes igual a 0 quer dizer “esse id não existe”. Então a rota responde 404 com uma mensagem em JSON.',
+      'Com DELETE /filmes/1, a linha existe: é apagada, changes vale 1 e a rota responde 204, sem corpo.'][k];
+    return { html: dual(build, { w: 760, h: 440, fs: 28, chY: 300 }, { w: 420, h: 440, fs: 20, chY: 300 }), caption };
+  }
+};
+
+// ---------- 16 · Prova real: 404 e 204 no terminal ----------
+const curlDelete = {
+  id: 'curldelete', kind: 'mock', kicker: 'Prova real', title: 'O mesmo 404 e o mesmo 204, de verdade', sources: ['execucao'],
+  steps: [{ id: 'sete', label: '', duration: 2.2 }, { id: 'um', label: '', duration: 2 }],
+  render({ state, time }) {
+    const script = [
+      [{ type: true, text: 'curl -i -X DELETE localhost:3000/filmes/7', at: .2, cps: 34 }, { text: 'HTTP/1.1 404 Not Found', at: 1.5, cls: 'warn', hl: 1.6 }, { text: '', at: 1.6 }, { text: '{"erro":"Filme não encontrado."}', at: 1.7, cls: 's' }],
+      [{ text: '', at: 0 }, { type: true, text: 'curl -i -X DELETE localhost:3000/filmes/1', at: .1, cps: 34 }, { text: 'HTTP/1.1 204 No Content', at: 1.4, cls: 'ok', hl: 1.5 }]
+    ];
+    const caption = state.step === 0 ? 'O filme 7 não existe: o servidor responde 404 e a mensagem em JSON, igual ao desenho.'
+      : 'O filme 1 existe: é apagado e volta 204, sem nenhuma linha de corpo depois do status.';
+    return { html: K.terminal(state, time, script, { title: 'terminal', badge: 'saída real, cabeçalhos reduzidos' }), caption };
+  }
+};
+
+// ---------- 17 · Prática: variar ----------
+const variar = K.quiz({
+  id: 'variar', kicker: 'Sua vez · variar', title: 'E se o id não existir?', sources: ['bsqlite', 'mdn-status'],
+  question: 'O banco tem só os filmes 1 e 2. Chega PUT /filmes/9 com um corpo válido. Qual status volta?',
+  hint: 'O corpo passa na validação. O que o UPDATE encontra com id 9?',
+  correct: '404', options: [{ value: '404', label: '404 Not Found' }, { value: '400', label: '400 Bad Request' }, { value: '200', label: '200 OK' }],
+  feedback: {
+    '404': 'Isso. O corpo passa na validação, mas o UPDATE … WHERE id = 9 não encontra linha: info.changes vale 0, e a rota responde 404.',
+    '400': '400 é para dados inválidos, e este corpo é válido. O problema está no id: o UPDATE não acha a linha 9, changes vale 0, e a resposta é 404.',
+    '200': 'A rota só responde 200 quando o UPDATE muda uma linha. Com id 9 nenhuma linha muda: changes vale 0, então volta 404.'
+  }
+});
+
+// ---------- 18 · Os ? do SQL ----------
+const interrog = {
+  id: 'interrog', kind: 'explicar', kicker: 'Segurança', title: 'Por que o SQL usa ? em vez de juntar texto', sources: ['owasp', 'bsqlite'],
+  steps: [{ id: 'perigo', label: '', duration: 1.3 }, { id: 'seguro', label: '', duration: 1.3 }],
+  render({ state, time }) {
+    const a = fade(lt(state, time, 0), .1), b = fade(lt(state, time, 1), .1), k = state.step;
+    // Texto neutro em tinta; só a linha do efeito leva a cor de erro ou de acerto.
+    const visual = `<svg viewBox="0 0 540 456" role="img">
+      ${txt('tt', 0, 18, 22, 'alguém chama: DELETE /filmes/1 OR 1=1', 'data-qa-text="ataque"')}
+      <g ${K.rise(a)}><rect x="0" y="44" width="540" height="190" rx="16" fill="var(--bad-soft)" opacity="${k === 0 ? 1 : .55}"/>
+        ${txt('tt mono', 18, 82, 21, '"... WHERE id = " + req.params.id', 'data-qa-text="ruim"')}
+        ${txt('tt mono', 18, 122, 21, 'vira: DELETE FROM filmes')}${txt('tt mono', 94, 156, 21, 'WHERE id = 1 OR 1=1')}
+        ${txt('no', 18, 204, 22, '✗ 1=1 é sempre verdade: apaga tudo', 'data-qa-text="ruim-efeito"')}</g>
+      <g ${K.rise(b)}><rect x="0" y="256" width="540" height="196" rx="16" fill="var(--good-soft)"/>
+        ${txt('tt mono', 18, 294, 21, "prepare('... WHERE id = ?')", 'data-qa-text="bom"')}${txt('tt mono', 44, 328, 21, '.run(req.params.id)')}
+        ${txt('tt', 18, 370, 21, 'procura o id "1 OR 1=1", como texto')}
+        ${txt('ok', 18, 418, 22, '✓ nenhuma linha tem esse id: 404', 'data-qa-text="bom-efeito"')}</g>
+    </svg>`;
+    const say = 'Com <span class="sc-term">?</span>, o valor vai separado do comando e nunca vira SQL.';
+    const caption = k === 0 ? 'Se o id for colado no texto do comando, quem chama a rota consegue escrever SQL: aqui, um pedido apagaria a tabela inteira.'
+      : 'Com ?, o better-sqlite3 entrega o valor à parte. "1 OR 1=1" vira só um id que não existe.';
+    return { html: K.split({ say, visual }), caption };
+  }
+};
+
+// ---------- 19 · Prova real: persistência ----------
+const reiniciar = {
+  id: 'reiniciar', kind: 'mock', kicker: 'Prova real', title: 'Desligar o servidor não apaga os filmes', sources: ['execucao', 'bsqlite'],
+  steps: [{ id: 'desligar', label: '', duration: 1.8 }, { id: 'religar', label: '', duration: 1.3 }, { id: 'listar', label: '', duration: 1.6 }],
+  render({ state, time }) {
+    const script = [
+      [{ type: true, text: 'node server.js', at: .2, cps: 26 }, { text: 'Servidor em http://localhost:3000', at: .9, cls: 'ok' }, { text: '^C', at: 1.4, cls: 'warn' }],
+      [{ type: true, text: 'node server.js', at: .1, cps: 26 }, { text: 'Servidor em http://localhost:3000', at: .8, cls: 'ok' }],
+      [{ text: '', at: 0 }, { type: true, prompt: '$ ', text: 'curl localhost:3000/filmes', at: .1, cps: 30 }, { text: `[${CASE.saved}]`, at: 1.1, cls: 's', hl: 1.25 }]
+    ];
+    const caption = ['O servidor é desligado com Ctrl+C. Tudo o que estava na memória do programa se perde.',
+      'Ao religar, o db.js abre o mesmo filmes.db. O CREATE TABLE IF NOT EXISTS só cria a tabela se ela ainda não existir.',
+      'A lista volta com Duna: o filme estava no arquivo, não na memória. É isso que você mostra ao professor recarregando a página.'][state.step];
+    return { html: K.terminal(state, time, script, { title: 'terminal', badge: 'saída real' }), caption };
+  }
+};
+
+// ---------- 20 · Prática: diagnosticar ----------
+const diagnosticar = K.quiz({
+  id: 'diagnosticar', kicker: 'Sua vez · diagnosticar', title: 'Um return esquecido', sources: ['execucao'],
+  question: 'Um colega tirou o return da linha que responde 400. Chega um POST com o título "D". O que acontece?',
+  hint: 'Sem return, a função não para depois de responder. A próxima linha é o INSERT.',
+  correct: 'salva', options: [{ value: 'salva', label: '400, mas grava "D"' }, { value: 'para', label: '400 e não grava nada' }, { value: '201', label: '201 e grava "D"' }],
+  feedback: {
+    'salva': 'Isso, e foi o que aconteceu ao testar: a resposta 400 sai, mas a função continua, o INSERT grava "D", e o res.status(201) quebra com ERR_HTTP_HEADERS_SENT.',
+    'para': 'Esse é o comportamento com o return. Sem ele, a função segue depois do 400: o INSERT grava "D" e o segundo envio quebra com ERR_HTTP_HEADERS_SENT.',
+    '201': 'Quem recebe a resposta vê 400, porque ela sai primeiro e cada pedido tem uma resposta só. O problema é que, depois dela, o INSERT ainda grava "D".'
+  }
+});
+
+// ---------- 21 · Fechamento ----------
+const resumo = {
+  id: 'resumo', kind: 'resumo', kicker: 'Resumo', title: 'O que acontece quando você clica em Salvar',
+  steps: [{ id: 'cards', label: '', duration: 1.3 }],
+  render({ time }) {
+    return { html: K.cards([
+      { icon: '→', text: 'Rota: método + caminho → função', sub: 'O Express escolhe qual roda.' },
+      { icon: '✓', text: 'Valide no servidor', sub: '400 com return; o formulário não basta.' },
+      { icon: '?', text: 'SQL com ?', sub: 'O dado nunca vira comando.' },
+      { icon: '▤', text: 'filmes.db guarda tudo', sub: 'Os filmes sobrevivem ao reinício.' }
+    ], time), caption: 'Na demonstração, ao clicar em Salvar, você consegue contar cada etapa: rota, validação, INSERT, 201 e o card.' };
+  }
+};
+
+window.lesson = LessonPlayer.create({
+  root: '#lesson', title: 'Backend do CineMais', lang: 'pt-BR',
+  sources: JSON.parse(document.getElementById('fontes').textContent),
+  slides: [salvar, curlPost, partes, rota, crud, reqres, banco, codigo, fluxo, sqlite, prever, burlar, validar, status, naoExiste, curlDelete, variar, interrog, reiniciar, diagnosticar, resumo]
+});
+</script>
+
+</body></html>
