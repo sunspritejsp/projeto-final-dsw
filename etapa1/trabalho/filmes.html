@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineMais - Em Cartaz</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- CABEÇALHO E NAVEGAÇÃO PRINCIPAL -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">Cine<span>Mais</span></a>
+      <nav class="main-nav" aria-label="Navegação principal">
+        <ul>
+          <li><a href="index.html" class="nav-link">Início</a></li>
+          <li><a href="filmes.html" class="nav-link active">Em Cartaz</a></li>
+          <li><a href="detalhes.html" class="nav-link">Detalhes</a></li>
+          <li><a href="ingressos.html" class="nav-link">Ingressos</a></li>
+          <li><a href="contato.html" class="nav-link">Contato</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL DA PÁGINA -->
+  <main id="main-content">
+    
+    <section class="container" aria-labelledby="em-cartaz-title">
+      <!-- Título da secção com margem superior ajustada para não colar no topo -->
+      <h1 id="em-cartaz-title" class="section-title" style="margin-top: 4rem;">Filmes em Cartaz</h1>
+
+      <div class="movies-grid">
+        
+        <!-- FILME 1 -->
+        <details class="movie-card movie-card-expandable">
+          <summary class="movie-summary">
+            <img src="images/duna.png" alt="Poster do filme Dune" class="movie-poster">
+            <div class="movie-info">
+              <h2 class="movie-title">Duna</h2>
+              <p class="movie-genre">Ação / Ficção Científica</p>
+              <span class="expand-hint">Clique para sinopse ↓</span>
+            </div>
+          </summary>
+          <div class="movie-expanded">
+            <p class="movie-synopsis">Duna acompanha a jornada de Paul Atreides, um jovem brilhante herdeiro da Casa Atreides que precisa viajar para o planeta mais perigoso do universo, Arrakis, para garantir o futuro de sua família e de seu povo.</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </details>
+
+        <!-- FILME 2 -->
+        <details class="movie-card movie-card-expandable">
+          <summary class="movie-summary">
+            <img src="images/aventuras de pi.jpg" alt="Poster do filme As Aventuras de Pi" class="movie-poster">
+            <div class="movie-info">
+              <h2 class="movie-title">As Aventuras de Pi</h2>
+              <p class="movie-genre">Drama / Aventura</p>
+              <span class="expand-hint">Clique para sinopse ↓</span>
+            </div>
+          </summary>
+          <div class="movie-expanded">
+            <p class="movie-synopsis">A história de um jovem indiano chamado Pi Patel que sobrevive por 227 dias em um bote no oceano Pacífico após um naufrágio.</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </details>
+
+        <!-- FILME 3 -->
+        <details class="movie-card movie-card-expandable">
+          <summary class="movie-summary">
+            <img src="images/Entre-facas-e-segredos.jpg" alt="Poster do filme Knives Out" class="movie-poster">
+            <div class="movie-info">
+              <h2 class="movie-title">Entre Facas e Segredos</h2>
+              <p class="movie-genre">Comédia / Mistério</p>
+              <span class="expand-hint">Clique para sinopse ↓</span>
+            </div>
+          </summary>
+          <div class="movie-expanded">
+            <p class="movie-synopsis">Após comemorar 85 anos de idade, o famoso escritor de histórias policiais Harlan Thrombey (Christopher Plummer) é encontrado morto dentro de sua propriedade. Logo, o detetive Benoit Blanc (Daniel Craig) é misteriosamente contratado para investigar o caso.</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </details>
+
+        <!-- FILME 4 -->
+        <details class="movie-card movie-card-expandable">
+          <summary class="movie-summary">
+            <img src="images/batman.png" alt="Poster do filme Batman" class="movie-poster">
+            <div class="movie-info">
+              <h2 class="movie-title">Batman - O Cavaleiro das Trevas</h2>
+              <p class="movie-genre">Suspense / Ação</p>
+              <span class="expand-hint">Clique para sinopse ↓</span>
+            </div>
+          </summary>
+          <div class="movie-expanded">
+            <p class="movie-synopsis">O Homem-Morcego enfrenta o caos instaurado pelo Coringa enquanto tenta ajudar o promotor Harvey Dent a proteger Gotham City.</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </details>
+
+        <!-- FILME 5 -->
+        <details class="movie-card movie-card-expandable">
+          <summary class="movie-summary">
+            <img src="images/la la land.png" alt="Poster do filme La La Land" class="movie-poster">
+            <div class="movie-info">
+              <h2 class="movie-title">La La Land</h2>
+              <p class="movie-genre">Drama / Musical</p>
+              <span class="expand-hint">Clique para sinopse ↓</span>
+            </div>
+          </summary>
+          <div class="movie-expanded">
+            <p class="movie-synopsis">Acompanha a história de amor entre a aspirante a atriz Mia (Emma Stone) e o pianista de jazz Sebastian (Ryan Gosling) enquanto tentam alcançar o sucesso em Los Angeles.</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </details>
+
+        <!-- FILME 6 -->
+        <details class="movie-card movie-card-expandable">
+          <summary class="movie-summary">
+            <img src="images/interestelar.jpg" alt="Poster do filme Interestelar" class="movie-poster">
+            <div class="movie-info">
+              <h2 class="movie-title">Interestelar</h2>
+              <p class="movie-genre">Ficção Científica</p>
+              <span class="expand-hint">Clique para sinopse ↓</span>
+            </div>
+          </summary>
+          <div class="movie-expanded">
+            <p class="movie-synopsis">Cooper (Matthew McConaughey), um ex-engenheiro e piloto de testes da NASA, vive como fazendeiro com sua família. Após decifrar uma anomalia gravitacional, ele descobre uma base secreta da agência espacial.</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </details>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- RODAPÉ COMPARTILHADO -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 CineMais - Projeto Integrador de Desenvolvimento Web.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

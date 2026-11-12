@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang = "pt-BR">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> Duna - Detalhes | CineMais</title>
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+
+    <body>
+        <!-- CABEÇALHO E MENU DE NAVEGAÇÃO -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">Cine<span>Mais</span></a>
+      
+      <nav class="main-nav" aria-label="Navegação principal">
+        <ul>
+          <li><a href="index.html" class="nav-link">Início</a></li>
+          <li><a href="filmes.html" class="nav-link">Em Cartaz</a></li>
+          <li><a href="detalhes.html" class="nav-link active">Detalhes</a></li>
+          <li><a href="ingressos.html" class="nav-link">Ingressos</a></li>
+          <li><a href="contato.html" class="nav-link">Contato</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main id="main-content">
+
+    <!-- PÔSTER E INFORMAÇÕES DE DESTAQUE -->
+    <section class="movie-hero">
+      <div class="container movie-hero-container">
+        
+        <!-- PÔSTER DO FILME -->
+        <img src="images/duna.png" alt="Pôster oficial de Duna" class="detail-poster">
+
+        <!-- DADOS RÁPIDOS DO FILME -->
+        <div class="movie-hero-info">
+          
+          <!-- ETIQUETAS (BADGES) -->
+          <div class="badges-group">
+            <span class="badge badge-rating">14 anos</span>
+            <span class="badge badge-tech">IMAX 3D</span>
+            <span class="badge badge-tech">Áudio Espacial</span>
+          </div>
+
+          <h1 class="movie-detail-title">Duna</h1>
+          <p class="movie-tagline">O medo é o assassino da mente.</p>
+
+          <div class="quick-meta">
+            <span><strong>Duração:</strong> 2h 35min</span>
+            <span>&bull;</span>
+            <span><strong>Gênero:</strong> Ação / Ficção Científica</span>
+            <span>&bull;</span>
+            <span><strong>Ano:</strong> 2021</span>
+          </div>
+
+          <a href="#sessoes" class="btn btn-primary btn-ver-horarios">Ver Sessões Disponíveis</a>
+
+        </div>
+
+      </div>
+    </section>
+    <!-- ÁREA DIVIDIDA: CONTEÚDO PRINCIPAL (ESQUERDA) + FICHA TÉCNICA (DIREITA) -->
+    <div class="container movie-layout">
+
+      <!-- COLUNA DA ESQUERDA: SINOPSE E SESSÕES -->
+      <section class="main-details" aria-labelledby="sinopse-title">
+        
+        <!-- SINOPSE DO FILME -->
+        <article class="movie-synopsis">
+          <h2 id="sinopse-title" class="section-title">Sinopse</h2>
+          <p>
+            Em um futuro distante, Paul Atreides é um jovem brilhante e talentoso, nascido com um grande destino 
+            além de sua compreensão. Ele deve viajar para o planeta mais perigoso e árido do universo, Arrakis, 
+            a única fonte da substância mais valiosa existente — a especiaria Melange —, capaz de desbloquear 
+            o maior potencial da humanidade enquanto forças malévolas entram em conflito mortal pelo seu controle.
+          </p>
+        </article>
+
+        <!-- SESSÕES E HORÁRIOS -->
+        <section id="sessoes" class="sessions-section" aria-labelledby="sessoes-title">
+          <h2 id="sessoes-title" class="section-title">Horários das Sessões</h2>
+          <p class="sessions-subtitle">Selecione um horário para avançar para a reserva:</p>
+
+          <!-- SALA 1 -->
+          <div class="room-block">
+            <div class="room-header">
+              <h3>Sala 1 - IMAX Laser (Tela Gigante)</h3>
+              <span class="session-type">Dublado</span>
+            </div>
+            <div class="times-grid">
+              <a href="contato.html" class="time-pill">14:00</a>
+              <a href="contato.html" class="time-pill">17:30</a>
+              <a href="contato.html" class="time-pill">21:00</a>
+            </div>
+          </div>
+
+          <!-- SALA 2 -->
+          <div class="room-block">
+            <div class="room-header">
+              <h3>Sala 3 - VIP Prime</h3>
+              <span class="session-type">Legendado</span>
+            </div>
+            <div class="times-grid">
+              <a href="contato.html" class="time-pill">15:15</a>
+              <a href="contato.html" class="time-pill">18:45</a>
+              <a href="contato.html" class="time-pill">22:15</a>
+            </div>
+          </div>
+
+        </section>
+
+      </section>
+
+      <!-- COLUNA DA DIREITA: BARRA LATERAL (ASIDE) COM FICHA TÉCNICA -->
+      <aside class="movie-sidebar" aria-label="Ficha técnica do filme">
+        <h2 class="sidebar-title">Ficha Técnica</h2>
+        
+        <dl class="meta-list">
+          <dt>Direção:</dt>
+          <dd>Denis Villeneuve</dd>
+
+          <dt>Roteiro:</dt>
+          <dd>Jon Spaihts, Denis Villeneuve, Eric Roth</dd>
+
+          <dt>Elenco Principal:</dt>
+          <dd>Timothée Chalamet, Rebecca Ferguson, Oscar Isaac, Zendaya</dd>
+
+          <dt>Trilha Sonora:</dt>
+          <dd>Hans Zimmer</dd>
+
+          <dt>Distribuidora:</dt>
+          <dd>Warner Bros. Pictures</dd>
+
+          <dt>Classificação:</dt>
+          <dd>Não recomendado para menores de 14 anos</dd>
+        </dl>
+      </aside>
+
+    </div>
+
+  </main>
+  <!-- RODAPÉ DA PÁGINA -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 CineMais - Projeto Integrador de Desenvolvimento Web.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
+    </body>
+</html>

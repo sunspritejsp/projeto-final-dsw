@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ingressos - CineMais</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/ingressos.css">
+</head>
+<body>
+
+  <!-- CABEÇALHO E NAVEGAÇÃO PRINCIPAL -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">Cine<span>Mais</span></a>
+      <nav class="main-nav" aria-label="Navegação principal">
+        <ul>
+          <li><a href="index.html" class="nav-link">Início</a></li>
+          <li><a href="filmes.html" class="nav-link">Em Cartaz</a></li>
+          <li><a href="detalhes.html" class="nav-link">Detalhes</a></li>
+          <li><a href="ingressos.html" class="nav-link active">Ingressos</a></li>
+          <li><a href="contato.html" class="nav-link">Contato</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL DA PÁGINA -->
+  <main id="main-content" class="container">
+
+    <h1 class="section-title">Reserve seu Ingresso</h1>
+    <p class="page-intro">
+      Escolha a sessão, informe seus dados e retire os ingressos na bilheteria
+      apresentando o código enviado por e-mail. A reserva fica disponível até
+      30 minutos antes do início da sessão.
+    </p>
+
+    <!-- LAYOUT EM GRID: FORMULÁRIO (ESQUERDA) + RESUMO (DIREITA) -->
+    <div class="ticket-layout">
+
+      <!-- FORMULÁRIO DE RESERVA -->
+      <section class="ticket-form-section" aria-labelledby="form-reserva-title">
+        <h2 id="form-reserva-title" class="ticket-subtitle">Dados da Reserva</h2>
+
+        <form class="ticket-form" action="#" method="POST">
+
+          <!-- GRUPO 1: ESCOLHA DA SESSÃO -->
+          <fieldset class="form-fieldset">
+            <legend class="form-legend">Sessão</legend>
+
+            <div class="form-group">
+              <label for="filme">Filme</label>
+              <select id="filme" name="filme" required>
+                <option value="" disabled selected>Selecione o filme</option>
+                <option value="duna">Duna</option>
+                <option value="aventuras-de-pi">As Aventuras de Pi</option>
+                <option value="entre-facas-e-segredos">Entre Facas e Segredos</option>
+                <option value="batman">Batman - O Cavaleiro das Trevas</option>
+                <option value="la-la-land">La La Land</option>
+                <option value="interestelar">Interestelar</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="data-sessao">Data da sessão</label>
+                <input type="date" id="data-sessao" name="data-sessao"
+                       min="2026-09-22" max="2026-09-29" required>
+                <small class="form-hint">Reservas abertas para os próximos 7 dias.</small>
+              </div>
+
+              <div class="form-group">
+                <label for="sala">Sala</label>
+                <select id="sala" name="sala" required>
+                  <option value="" disabled selected>Selecione a sala</option>
+                  <option value="sala-1">Sala 1 - IMAX Laser</option>
+                  <option value="sala-2">Sala 2 - Tradicional</option>
+                  <option value="sala-3">Sala 3 - VIP Prime</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- ESCOLHA ÚNICA ENTRE ALTERNATIVAS: RADIO -->
+            <div class="form-group">
+              <span class="group-label" id="label-audio">Áudio</span>
+              <div class="radio-group" role="radiogroup" aria-labelledby="label-audio">
+                <label class="option-label" for="audio-dublado">
+                  <input type="radio" id="audio-dublado" name="audio" value="dublado" checked>
+                  Dublado
+                </label>
+                <label class="option-label" for="audio-legendado">
+                  <input type="radio" id="audio-legendado" name="audio" value="legendado">
+                  Legendado
+                </label>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- GRUPO 2: QUANTIDADE DE INGRESSOS -->
+          <fieldset class="form-fieldset">
+            <legend class="form-legend">Ingressos</legend>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="qtd-inteira">Inteira (R$ 32,00)</label>
+                <input type="number" id="qtd-inteira" name="qtd-inteira"
+                       min="0" max="10" value="1" required>
+              </div>
+
+              <div class="form-group">
+                <label for="qtd-meia">Meia-entrada (R$ 16,00)</label>
+                <input type="number" id="qtd-meia" name="qtd-meia"
+                       min="0" max="10" value="0" required>
+              </div>
+            </div>
+
+            <small class="form-hint">Limite de 10 ingressos por tipo em cada reserva.</small>
+          </fieldset>
+
+          <!-- GRUPO 3: IDENTIFICAÇÃO DO CLIENTE -->
+          <fieldset class="form-fieldset">
+            <legend class="form-legend">Seus dados</legend>
+
+            <div class="form-group">
+              <label for="nome">Nome completo</label>
+              <input type="text" id="nome" name="nome"
+                     placeholder="Seu nome" minlength="3" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email"
+                       placeholder="seuemail@exemplo.com" required>
+                <small class="form-hint">O código da reserva é enviado para este e-mail.</small>
+              </div>
+
+              <div class="form-group">
+                <label for="cpf">CPF</label>
+                <input type="text" id="cpf" name="cpf"
+                       placeholder="000.000.000-00"
+                       pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+                       maxlength="14"
+                       title="Digite o CPF no formato 000.000.000-00"
+                       required>
+                <small class="form-hint">Use o formato 000.000.000-00.</small>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- GRUPO 4: OPCIONAIS E CONFIRMAÇÃO -->
+          <fieldset class="form-fieldset">
+            <legend class="form-legend">Combos e observações</legend>
+
+            <!-- SELEÇÃO DE UMA OU MAIS OPÇÕES: CHECKBOX -->
+            <div class="form-group">
+              <span class="group-label" id="label-combos">Adicionar à reserva</span>
+              <div class="checkbox-group" aria-labelledby="label-combos">
+                <label class="option-label" for="combo-pipoca">
+                  <input type="checkbox" id="combo-pipoca" name="combos" value="pipoca">
+                  Combo pipoca + refrigerante
+                </label>
+                <label class="option-label" for="combo-chocolate">
+                  <input type="checkbox" id="combo-chocolate" name="combos" value="chocolate">
+                  Chocolate
+                </label>
+                <label class="option-label" for="combo-agua">
+                  <input type="checkbox" id="combo-agua" name="combos" value="agua">
+                  Água mineral
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="observacao">Observação</label>
+              <textarea id="observacao" name="observacao" rows="4" maxlength="300"
+                        placeholder="Cadeira para obeso, espaço para cadeirante, aniversário..."></textarea>
+              <small class="form-hint">Opcional, até 300 caracteres.</small>
+            </div>
+
+            <div class="form-group">
+              <label class="option-label" for="termos">
+                <input type="checkbox" id="termos" name="termos" value="aceito" required>
+                Li e aceito a política de meia-entrada e de cancelamento.
+              </label>
+            </div>
+          </fieldset>
+
+          <!-- AÇÕES DO FORMULÁRIO -->
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Confirmar Reserva</button>
+            <button type="reset" class="btn btn-secondary">Limpar Campos</button>
+            <button type="button" class="btn btn-secondary" disabled>
+              Pagar Online (em breve)
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- INFORMAÇÕES DE APOIO -->
+      <aside class="ticket-summary" aria-labelledby="resumo-title">
+        <h2 id="resumo-title" class="sidebar-title">Como Funciona</h2>
+
+        <ol class="steps-list">
+          <li><strong>Escolha</strong> o filme, a data e a sala da sessão.</li>
+          <li><strong>Informe</strong> a quantidade de ingressos e seus dados.</li>
+          <li><strong>Confirme</strong> e receba o código da reserva por e-mail.</li>
+          <li><strong>Retire</strong> os ingressos na bilheteria com o código.</li>
+        </ol>
+
+        <h3 class="summary-subtitle">Meia-entrada</h3>
+        <p class="summary-text">
+          O benefício exige apresentação de documento comprobatório na bilheteria.
+          Têm direito estudantes, pessoas com mais de 60 anos, pessoas com deficiência
+          e seu acompanhante, além de jovens de baixa renda entre 15 e 29 anos.
+        </p>
+
+        <h3 class="summary-subtitle">Cancelamento</h3>
+        <p class="summary-text">
+          A reserva pode ser cancelada sem custo até 2 horas antes do início da sessão,
+          pelos nossos <a href="contato.html" class="summary-link">canais de atendimento</a>.
+        </p>
+      </aside>
+
+    </div>
+
+  </main>
+
+  <!-- RODAPÉ COMPARTILHADO -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 CineMais - Projeto Integrador de Desenvolvimento Web.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

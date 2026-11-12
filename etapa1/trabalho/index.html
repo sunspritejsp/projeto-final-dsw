@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineMais - Seu Cinema Online</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- CABEÇALHO E NAVEGAÇÃO PRINCIPAL -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">Cine<span>Mais</span></a>
+      <nav class="main-nav" aria-label="Navegação principal">
+        <ul>
+          <li><a href="index.html" class="nav-link active">Início</a></li>
+          <li><a href="filmes.html" class="nav-link">Em Cartaz</a></li>
+          <li><a href="detalhes.html" class="nav-link">Detalhes</a></li>
+          <li><a href="ingressos.html" class="nav-link">Ingressos</a></li>
+          <li><a href="contato.html" class="nav-link">Contato</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL DA PÁGINA -->
+  <main id="main-content">
+
+    <!-- SEÇÃO HERO / DESTAQUE -->
+    <section class="hero" aria-label="Destaque principal">
+      <div class="container">
+        <div class="hero-content">
+          <h1 class="hero-title">Duna</h1>
+          <p class="hero-description">Disponível em IMAX 3D. Garanta seu lugar na pré-estreia do filme mais aguardado do ano.</p>
+          <a href="ingressos.html" class="btn btn-primary">Garantir Ingresso</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO DE FILMES EM DESTAQUE -->
+    <section class="container" aria-labelledby="em-cartaz-title">
+      <h2 id="em-cartaz-title" class="section-title">Destaques da Semana</h2>
+
+      <div class="movies-grid">
+        
+        <!-- CARD 1 -->
+        <article class="movie-card">
+          <img src="images/duna.png" alt="Poster do filme Dune" class="movie-poster">
+          <div class="movie-info">
+            <h3 class="movie-title">Duna</h3>
+            <p class="movie-genre">Ação / Ficção Científica</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </article>
+
+        <!-- CARD 2 -->
+        <article class="movie-card">
+          <img src="images/aventuras de pi.jpg" alt="Poster do filme As Aventuras de Pi" class="movie-poster">
+          <div class="movie-info">
+            <h3 class="movie-title">As Aventuras de Pi</h3>
+            <p class="movie-genre">Drama / Aventura</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </article>
+
+        <!-- CARD 3 -->
+        <article class="movie-card">
+          <img src="images/Entre-facas-e-segredos.jpg" alt="Poster do filme Knives Out" class="movie-poster">
+          <div class="movie-info">
+            <h3 class="movie-title">Entre Facas e Segredos</h3>
+            <p class="movie-genre">Comédia / Mistério</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </article>
+
+        <!-- CARD 4 -->
+        <article class="movie-card">
+          <img src="images/batman.png" alt="Poster do filme Batman" class="movie-poster">
+          <div class="movie-info">
+            <h3 class="movie-title">Batman - O Cavaleiro das...</h3>
+            <p class="movie-genre">Suspense / Ação</p>
+            <a href="detalhes.html" class="btn btn-primary">Ver Horários</a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- RODAPÉ COMPARTILHADO -->
+  <site-footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 CineMais - Projeto Integrador de Desenvolvimento Web.</p>
+    </div>
+  </site-footer>
+
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contato - CineMais</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/contato.css">
+</head>
+<body>
+
+  <!-- CABEÇALHO E NAVEGAÇÃO PRINCIPAL -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">Cine<span>Mais</span></a>
+      <nav class="main-nav" aria-label="Navegação principal">
+        <ul>
+          <li><a href="index.html" class="nav-link">Início</a></li>
+          <li><a href="filmes.html" class="nav-link">Em Cartaz</a></li>
+          <li><a href="detalhes.html" class="nav-link">Detalhes</a></li>
+          <li><a href="ingressos.html" class="nav-link">Ingressos</a></li>
+          <li><a href="contato.html" class="nav-link active">Contato</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL DA PÁGINA -->
+  <main id="main-content" class="container main-contact-container">
+
+    <h1 class="section-title">Fale Conosco</h1>
+
+    <div class="contact-grid">
+      
+      <!-- CANAIS DE CONTATO RÁPIDO -->
+      <section class="contact-info-section" aria-labelledby="canais-atendimento">
+        <h2 id="canais-atendimento" class="contact-subtitle">Canais de Atendimento</h2>
+        <p class="contact-description">
+          Precisa de ajuda com ingressos, programação ou tem alguma dúvida? Entre em contato por um dos canais abaixo ou nos envie uma mensagem.
+        </p>
+
+        <div class="contact-cards">
+          <div class="contact-card">
+            <h3>Atendimento ao Cliente</h3>
+            <p><strong>E-mail:</strong> contato@cinemais.com.br</p>
+            <p><strong>Telefone:</strong> (82) 3315-0000</p>
+            <p><strong>Horário:</strong> Seg a Dom, das 10h às 22h</p>
+          </div>
+
+          <div class="contact-card">
+            <h3>Ouvidoria & SAC</h3>
+            <p><strong>E-mail:</strong> sac@cinemais.com.br</p>
+            <p><strong>WhatsApp:</strong> (82) 99999-8888</p>
+            <p><strong>Horário:</strong> Seg a Sex, das 09h às 18h</p>
+          </div>
+
+          <div class="contact-card">
+            <h3>Nosso Endereço Principal</h3>
+            <p>Av. Comendador Gustavo Paiva, 2990 - Mangabeiras</p>
+            <p>Maceió - AL, 57037-901</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FORMULÁRIO DE CONTATO -->
+      <section class="contact-form-section" aria-labelledby="formulario-contato">
+        <h2 id="formulario-contato" class="contact-subtitle">Envie uma Mensagem</h2>
+        
+        <form class="contact-form" action="#" method="POST">
+          <div class="form-group">
+            <label for="nome">Nome Completo</label>
+            <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="seuemail@exemplo.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="assunto">Assunto</label>
+            <select id="assunto" name="assunto" required>
+              <option value="" disabled selected>Selecione o assunto</option>
+              <option value="ingressos">Dúvidas sobre Ingressos</option>
+              <option value="programacao">Programação / Filmes</option>
+              <option value="sugestao">Elogios ou Sugestões</option>
+              <option value="reclamacao">Reclamações</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="mensagem">Mensagem</label>
+            <textarea id="mensagem" name="mensagem" rows="5" placeholder="Escreva sua mensagem aqui..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Enviar Mensagem</button>
+        </form>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- RODAPÉ COMPARTILHADO -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 CineMais - Projeto Integrador de Desenvolvimento Web.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

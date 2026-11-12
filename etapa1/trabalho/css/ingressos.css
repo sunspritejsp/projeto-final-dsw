@@ -1,0 +1,331 @@
+/* ==========================================================================
+   PÁGINA DE INGRESSOS (ingressos.html)
+   Este arquivo complementa o style.css: reaproveita as variáveis do :root e as
+   classes .container, .section-title, .btn e .btn-primary já definidas lá.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   AJUSTE DA NAVEGAÇÃO EM TELAS ESTREITAS
+   No style.css o cabeçalho é uma linha flex sem quebra (logo à esquerda, menu
+   à direita). Abaixo de ~600px os 5 links não cabem e empurram a página para a
+   direita, criando rolagem horizontal. Mobile First: aqui o cabeçalho empilha
+   — logo em cima, menu centrado embaixo — e a partir de 600px a media query no
+   fim deste arquivo devolve o layout original em uma linha só.
+   -------------------------------------------------------------------------- */
+.nav-container {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.main-nav {
+  width: 100%;
+}
+
+.main-nav ul {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.25rem;   /* menos respiro vertical entre as duas linhas do menu */
+}
+
+.page-intro {
+  color: var(--text-muted);
+  max-width: 65ch;
+  margin-bottom: 2.5rem;
+}
+
+/* ==========================================================================
+   1. LAYOUT DA PÁGINA (CSS GRID)
+   Grid porque a relação entre formulário e resumo é bidimensional: no celular
+   são duas linhas; no desktop, duas colunas de proporções diferentes.
+   ========================================================================== */
+.ticket-layout {
+  display: grid;
+  grid-template-columns: 1fr;   /* Mobile First: uma coluna só */
+  gap: 2rem;
+  align-items: start;
+  margin-bottom: 4rem;
+}
+
+/* ==========================================================================
+   2. BLOCO DO FORMULÁRIO
+   ========================================================================== */
+.ticket-form-section {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+}
+
+.ticket-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.ticket-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Agrupamento semântico dos campos (fieldset + legend) */
+.form-fieldset {
+  border: 1px solid var(--bg-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-legend {
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0 0.5rem;
+}
+
+/* ==========================================================================
+   3. CAMPOS E RÓTULOS
+   ========================================================================== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label,
+.group-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-main);
+  font-family: var(--font-family-base);
+  font-size: 0.95rem;
+  transition: border-color var(--transition-fast);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+.form-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Duas colunas lado a lado a partir do tablet (ver media query no fim) */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+/* ==========================================================================
+   4. RADIO E CHECKBOX
+   Flexbox porque são fileiras unidimensionais de opções, que quebram de linha
+   (flex-wrap) quando a largura disponível não comporta todas.
+   ========================================================================== */
+.radio-group,
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.checkbox-group {
+  flex-direction: column;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  color: var(--text-muted);
+  font-weight: 400;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.option-label:hover {
+  color: var(--text-main);
+}
+
+/* Área de clique confortável e cor de destaque na marcação */
+.option-label input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   5. PSEUDO-CLASSES E ESTADOS
+   ========================================================================== */
+
+/* Foco visível: essencial para quem navega por teclado */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.option-label input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Erro só aparece depois que o usuário mexeu no campo. É para isso que serve a
+   pseudo-classe :user-invalid: diferente de :invalid, ela não marca um campo
+   obrigatório que ainda está vazio porque a página acabou de carregar. */
+.form-group input:user-invalid,
+.form-group select:user-invalid,
+.form-group textarea:user-invalid {
+  border-color: var(--color-primary);
+  background-color: rgba(229, 9, 20, 0.06);
+}
+
+/* O contrário também vale: campo preenchido corretamente ganha borda neutra. */
+.form-group input:user-valid,
+.form-group select:user-valid,
+.form-group textarea:user-valid {
+  border-color: var(--text-muted);
+}
+
+/* ==========================================================================
+   6. BOTÕES DE AÇÃO
+   Flexbox: fileira unidimensional que quebra em telas estreitas.
+   ========================================================================== */
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Ação secundária: mesmo formato do .btn, peso visual menor que o primário */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--bg-tertiary);
+}
+
+.btn-secondary:hover:not(:disabled),
+.btn-secondary:focus:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  border-color: var(--text-muted);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==========================================================================
+   7. BARRA LATERAL DE APOIO (ASIDE)
+   ========================================================================== */
+.ticket-summary {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+}
+
+.steps-list {
+  list-style: decimal inside;   /* sobrescreve o list-style:none do reset */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.steps-list strong {
+  color: var(--text-main);
+}
+
+.summary-subtitle {
+  font-size: 1rem;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--bg-tertiary);
+}
+
+.summary-text {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.summary-link {
+  color: var(--color-primary);
+  text-decoration: underline;
+  transition: color var(--transition-fast);
+}
+
+.summary-link:hover,
+.summary-link:focus {
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   8. RESPONSIVIDADE (MOBILE FIRST)
+   Mesmos pontos de quebra usados em style.css e contato.css.
+   ========================================================================== */
+
+/* Tablet: campos curtos passam a dividir a linha */
+@media (min-width: 600px) {
+  /* Cabeçalho volta ao formato de uma linha só, como nas demais páginas */
+  .nav-container {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+
+  .main-nav {
+    width: auto;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ticket-form-section,
+  .ticket-summary {
+    padding: 2rem;
+  }
+}
+
+/* Desktop: o resumo deixa de ficar abaixo e vira coluna lateral */
+@media (min-width: 900px) {
+  .ticket-layout {
+    grid-template-columns: 2fr 1fr;
+    gap: 2.5rem;
+  }
+
+  .radio-group {
+    flex-direction: row;
+  }
+}

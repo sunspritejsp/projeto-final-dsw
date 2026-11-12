@@ -1,0 +1,565 @@
+/* ==========================================================================
+   1. VARIÁVEIS DO PROJETO (:root)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Paleta de Cores */
+  --bg-primary: #121214;       /* Preto/Grafite escuro para o fundo geral */
+  --bg-secondary: #1E1E24;     /* Cinza escuro para cards, headers e superfícies */
+  --bg-tertiary: #2A2A32;      /* Cinza intermediário para bordas e destaques sutis */
+  
+  --color-primary: #E50914;    /* Vermelho de destaque principal (CineMais) */
+  --color-primary-hover: #B80710; /* Vermelho mais escuro para estados interativos (:hover) */
+  
+  --text-main: #FFFFFF;        /* Texto principal com alto contraste */
+  --text-muted: #A1A1AA;       /* Texto secundário/suave */
+  
+  /* Tipografia */
+  --font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Layout e Espaçamento */
+  --container-max-width: 1200px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --transition-fast: 0.2s ease;
+}
+
+/* ==========================================================================
+   2. RESET E BOX MODEL
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-family-base);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* ==========================================================================
+   3. COMPONENTES REUTILIZÁVEIS E LAYOUT
+   ========================================================================== */
+.container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Header & Nav */
+.site-header {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--bg-tertiary);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.logo span {
+  color: var(--color-primary);
+}
+
+.main-nav ul {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+  padding: 0.5rem 0;
+}
+
+.nav-link:hover,
+.nav-link:focus,
+.nav-link.active {
+  color: var(--color-primary);
+  outline: none;
+}
+
+/* Botões */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--text-main);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+/* Hero Section */
+.hero {
+  background: linear-gradient(180deg, rgba(18, 18, 20, 0.4) 0%, var(--bg-primary) 100%),
+              url('../images/hero-banner.jpg') center/cover no-repeat;
+  padding: 5rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.hero-content {
+  max-width: 600px;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.hero-description {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Seções e Cards (CSS Grid) */
+.section-title {
+  font-size: 1.75rem;
+  margin: 3rem 0 1.5rem;
+  border-left: 4px solid var(--color-primary);
+  padding-left: 0.75rem;
+}
+
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+.movie-card {
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-fast);
+}
+
+.movie-card:hover {
+  transform: translateY(-5px);
+}
+
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.movie-info {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.movie-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.movie-genre {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.movie-card .btn {
+  margin-top: auto;
+}
+
+/* Footer */
+.site-footer {
+  margin-top: auto;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--bg-tertiary);
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* ==========================================================================
+   4. RESPONSIVIDADE (MOBILE FIRST)
+   ========================================================================== */
+@media (min-width: 600px) {
+  .movies-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .hero-title {
+    font-size: 3.5rem;
+  }
+  .movies-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ==========================================================================
+   5. COMPONENTES EXPANSÍVEIS (PÁGINA EM CARTAZ)
+   ========================================================================== */
+
+/* Spacing inferior na grade para separar completamente os cards do rodapé */
+.movies-grid {
+  align-items: start;
+  margin-bottom: 5rem; 
+}
+
+/* Card base */
+.movie-card-expandable {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.movie-card-expandable:hover {
+  transform: translateY(-4px);
+}
+
+/* Área clicável (Summary) */
+.movie-summary {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.movie-summary::-webkit-details-marker {
+  display: none;
+}
+
+.movie-summary .movie-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+/* Padronização de altura dos títulos para alinhamento dos cards */
+.movie-summary .movie-title {
+  min-height: 2.8rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Animação e transição suave do clique "Clique para sinopse" */
+.expand-hint {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  margin-top: auto;
+  font-weight: 600;
+  display: inline-block;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+/* Efeito ao passar o mouse e ao clicar na chamada para ação */
+.movie-summary:hover .expand-hint {
+  color: var(--text-main);
+  transform: translateY(2px);
+}
+
+.movie-summary:active .expand-hint {
+  transform: scale(0.95);
+}
+
+/* Oculta a dica ao expandir */
+details[open] .expand-hint {
+  display: none;
+}
+
+/* Contêiner da sinopse */
+.movie-expanded {
+  padding: 0 1rem 1.5rem 1rem;
+  border-top: 1px solid var(--bg-tertiary);
+}
+
+.movie-synopsis {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Botão de horários centralizado e adaptado à largura */
+.movie-expanded .btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+/* Transição suave do painel expandido */
+@keyframes smoothReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   6. PÁGINA DE DETALHES DO FILME (detalhes.html)
+   ========================================================================== */
+
+/* Hero: destaque visual no topo */
+.movie-hero {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--bg-tertiary);
+  padding: 2.5rem 0;
+}
+
+.movie-hero-container {
+  display: flex;
+  flex-direction: column; /* Mobile First: pôster em cima do texto no celular */
+  gap: 2rem;
+  align-items: center;
+}
+
+.detail-poster {
+  width: 240px;
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.movie-hero-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Badges (Etiquetas de classificação e formatos) */
+.badges-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--border-radius-sm);
+}
+
+.badge-rating {
+  background-color: #F59E0B; /* Laranja da classificação 14 anos */
+  color: #000;
+}
+
+.badge-tech {
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.movie-detail-title {
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.movie-tagline {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.quick-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.quick-meta strong {
+  color: var(--text-main);
+}
+
+.btn-ver-horarios {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+/* Layout Principal com CSS Grid */
+.movie-layout {
+  display: grid;
+  grid-template-columns: 1fr; /* Coluna única no celular */
+  gap: 2.5rem;
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+.movie-synopsis p {
+  color: var(--text-muted);
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+
+/* Seção de Sessões e Botões de Horário */
+.sessions-subtitle {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.room-block {
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--bg-tertiary);
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.room-header h3 {
+  font-size: 1.1rem;
+}
+
+.session-type {
+  background-color: var(--bg-tertiary);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.times-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* Microinterações nos botões de horário (:hover, :focus, transition) */
+.time-pill {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  border: 1px solid var(--bg-tertiary);
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all var(--transition-fast);
+}
+
+.time-pill:hover,
+.time-pill:focus {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  transform: translateY(-2px);
+  outline: none;
+}
+
+/* Ficha Técnica (Sidebar / <aside>) */
+.movie-sidebar {
+  background-color: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--bg-tertiary);
+  height: fit-content;
+}
+
+.sidebar-title {
+  font-size: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--bg-tertiary);
+  padding-bottom: 0.5rem;
+}
+
+.meta-list dt {
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.meta-list dd {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Media Query: Responsividade para Tablet e Desktop (Mobile First) */
+@media (min-width: 768px) {
+  .movie-hero-container {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .movie-detail-title {
+    font-size: 2.5rem;
+  }
+
+  /* Divide o layout: 2.2 frações para a sinopse/sessões e 1 fração para o aside */
+  .movie-layout {
+    grid-template-columns: 2.2fr 1fr;
+  }
+}
