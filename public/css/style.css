@@ -74,13 +74,13 @@ img { max-width: 100%; display: block; }
 .btn-secundario { background: var(--borda); }
 .btn-secundario:hover { background: var(--texto-suave); }
 
-/* 5. Destaque (hero) e títulos */
-.hero {
+/* 5. Banner do topo e títulos */
+.banner {
   background: linear-gradient(135deg, var(--vermelho-escuro), var(--fundo) 70%);
   padding: 5rem 0;
 }
-.hero h1 { font-size: 2.5rem; line-height: 1.2; margin-bottom: 1rem; }
-.hero p { color: var(--texto-suave); max-width: 600px; margin-bottom: 1.5rem; }
+.banner h1 { font-size: 2.5rem; line-height: 1.2; margin-bottom: 1rem; }
+.banner p { color: var(--texto-suave); max-width: 600px; margin-bottom: 1.5rem; }
 
 .section-title {
   font-size: 1.75rem;
@@ -159,6 +159,6 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--v
   .movies-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (min-width: 900px) {
-  .hero h1 { font-size: 3.5rem; }
+  .banner h1 { font-size: 3.5rem; }
   .movies-grid { grid-template-columns: repeat(4, 1fr); }
 }
