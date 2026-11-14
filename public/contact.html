@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineMais - Contato</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <a href="index.html" class="logo">Cine<span>Mais</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Início</a></li>
+        <li><a href="movies.html" class="nav-link">Filmes</a></li>
+        <li><a href="contact.html" class="nav-link active">Contato</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1 class="section-title">Contato</h1>
+    <p class="text">Envie uma dúvida, sugestão ou reclamação. Respondemos pelo e-mail informado.</p>
+
+    <!-- Sucesso ou erro do envio aparecem aqui; começa escondida -->
+    <p id="status-message" class="message hidden" role="status"></p>
+
+    <form id="contact-form" class="form">
+      <label class="field" for="name">
+        Nome
+        <input type="text" id="name" name="name" required minlength="2" maxlength="100">
+      </label>
+
+      <label class="field" for="email">
+        E-mail
+        <input type="email" id="email" name="email" required>
+      </label>
+
+      <label class="field" for="subject">
+        Assunto
+        <select id="subject" name="subject" required>
+          <option value="">Selecione...</option>
+          <option>Dúvida</option>
+          <option>Sugestão</option>
+          <option>Reclamação</option>
+          <option>Elogio</option>
+        </select>
+      </label>
+
+      <label class="field" for="message">
+        Mensagem
+        <textarea id="message" name="message" rows="5" required minlength="10" maxlength="1000"></textarea>
+      </label>
+
+      <div>
+        <button type="submit" id="submit-button" class="button">Enviar</button>
+      </div>
+    </form>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 CineMais - Projeto Integrador de Desenvolvimento Web.</p>
+  </footer>
+</body>
+</html>
