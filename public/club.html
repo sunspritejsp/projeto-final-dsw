@@ -21,11 +21,15 @@
 
   <main class="container">
     <h1 class="section-title">Clube MaisPipoca</h1>
-    <p class="text">Assine o clube e ganhe um combo de pipoca em cada sessão. Estudantes pagam meia. <a href="#member-list-title">Ver membros</a>.</p>
+    <p class="text">Assine o clube e ganhe um combo de pipoca em cada sessão. Estudantes pagam meia.</p>
 
-    <!-- Formulário usado para inscrever e também para editar -->
+    <!-- Formulário usado para inscrever e também para editar (club.html?id=5 abre o membro 5 para edição) -->
     <section>
       <h2 id="form-title" class="section-title">Inscrição</h2>
+
+      <!-- Sucesso ou erro do envio aparecem aqui; começa escondida -->
+      <p id="status-message" class="message hidden" role="status"></p>
+
       <form id="member-form" class="form">
         <!-- Guarda o id do membro em edição; vazio = inscrição nova -->
         <input type="hidden" id="member-id">
@@ -127,24 +131,9 @@
           <button type="button" id="cancel-button" class="button button-secondary hidden">Cancelar edição</button>
         </div>
       </form>
-    </section>
 
-    <section>
-      <h2 id="member-list-title" class="section-title">Membros do clube</h2>
-
-      <div class="search-bar">
-        <input type="search" id="search" placeholder="Buscar por nome..." aria-label="Buscar por nome">
-        <label class="option" for="filter-student">
-          <input type="checkbox" id="filter-student">
-          Só estudantes
-        </label>
-      </div>
-
-      <!-- Carregando, lista vazia, erro e sucesso aparecem aqui (role="status" faz o leitor de tela anunciar) -->
-      <p id="status-message" class="message" role="status">Carregando membros...</p>
-
-      <!-- O club.js cria um <article class="card"> por membro aqui dentro -->
-      <div id="member-list" class="grid"></div>
+      <!-- Página da equipe, fora do menu principal -->
+      <p class="text">Área da equipe: <a href="members.html">ver membros do clube</a>.</p>
     </section>
   </main>
 
