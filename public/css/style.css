@@ -277,6 +277,11 @@ textarea:user-invalid {
   border-radius: var(--radius-sm);
 }
 
+/* Campos dentro de um grupo (endereço): crescem e quebram linha a partir de 200px */
+.options .field {
+  flex: 1 1 200px;
+}
+
 .options legend {
   padding: 0 0.3rem;
   font-weight: 600;

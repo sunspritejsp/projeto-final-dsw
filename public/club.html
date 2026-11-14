@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineMais - Clube MaisPipoca</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <a href="index.html" class="logo">Cine<span>Mais</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Início</a></li>
+        <li><a href="movies.html" class="nav-link">Em Cartaz</a></li>
+        <li><a href="about.html" class="nav-link">Sobre</a></li>
+        <li><a href="club.html" class="nav-link active">Clube</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1 class="section-title">Clube MaisPipoca</h1>
+    <p class="text">Assine o clube e ganhe um combo de pipoca em cada sessão. Estudantes pagam meia. <a href="#member-list-title">Ver membros</a>.</p>
+
+    <!-- Formulário usado para inscrever e também para editar -->
+    <section>
+      <h2 id="form-title" class="section-title">Inscrição</h2>
+      <form id="member-form" class="form">
+        <!-- Guarda o id do membro em edição; vazio = inscrição nova -->
+        <input type="hidden" id="member-id">
+
+        <label class="field" for="name">
+          Nome
+          <input type="text" id="name" name="name" required minlength="2" maxlength="100">
+        </label>
+
+        <label class="field" for="email">
+          E-mail
+          <input type="email" id="email" name="email" required maxlength="100">
+        </label>
+
+        <label class="field" for="birth-date">
+          Data de nascimento
+          <input type="date" id="birth-date" name="birth_date" required>
+        </label>
+
+        <!-- Basta um radio com required para o grupo todo ser obrigatório -->
+        <fieldset class="options">
+          <legend>Plano (tamanho do combo)</legend>
+          <label class="option" for="plan-small"><input type="radio" id="plan-small" name="plan" value="Pequena" required> Pipoca Pequena</label>
+          <label class="option" for="plan-medium"><input type="radio" id="plan-medium" name="plan" value="Média"> Pipoca Média</label>
+          <label class="option" for="plan-large"><input type="radio" id="plan-large" name="plan" value="Grande"> Pipoca Grande</label>
+        </fieldset>
+
+        <label class="option" for="student">
+          <input type="checkbox" id="student" name="student">
+          Sou estudante (meia-entrada)
+        </label>
+
+        <!-- Endereço para envio da carteirinha do clube -->
+        <fieldset class="options">
+          <legend>Endereço para a carteirinha</legend>
+
+          <label class="field" for="zip-code">
+            CEP
+            <input type="text" id="zip-code" name="zip_code" required pattern="[0-9]{5}-?[0-9]{3}" maxlength="9" placeholder="00000-000">
+          </label>
+
+          <label class="field" for="street">
+            Rua
+            <input type="text" id="street" name="street" required minlength="2" maxlength="100">
+          </label>
+
+          <label class="field" for="house-number">
+            Número (opcional)
+            <input type="number" id="house-number" name="house_number" min="1" max="99999" step="1">
+          </label>
+
+          <label class="field" for="city">
+            Cidade
+            <input type="text" id="city" name="city" required minlength="2" maxlength="100">
+          </label>
+
+          <label class="field" for="state">
+            Estado
+            <select id="state" name="state" required>
+              <option value="">UF</option>
+              <option>AC</option>
+              <option>AL</option>
+              <option>AP</option>
+              <option>AM</option>
+              <option>BA</option>
+              <option>CE</option>
+              <option>DF</option>
+              <option>ES</option>
+              <option>GO</option>
+              <option>MA</option>
+              <option>MT</option>
+              <option>MS</option>
+              <option>MG</option>
+              <option>PA</option>
+              <option>PB</option>
+              <option>PR</option>
+              <option>PE</option>
+              <option>PI</option>
+              <option>RJ</option>
+              <option>RN</option>
+              <option>RS</option>
+              <option>RO</option>
+              <option>RR</option>
+              <option>SC</option>
+              <option>SP</option>
+              <option>SE</option>
+              <option>TO</option>
+            </select>
+          </label>
+
+          <label class="field" for="address-details">
+            Complemento (opcional)
+            <textarea id="address-details" name="address_details" rows="3" maxlength="200" placeholder="Apartamento, bloco, ponto de referência..."></textarea>
+          </label>
+        </fieldset>
+
+        <div class="card-actions">
+          <button type="submit" id="submit-button" class="button">Inscrever</button>
+          <button type="button" id="cancel-button" class="button button-secondary hidden">Cancelar edição</button>
+        </div>
+      </form>
+    </section>
+
+    <section>
+      <h2 id="member-list-title" class="section-title">Membros do clube</h2>
+
+      <div class="search-bar">
+        <input type="search" id="search" placeholder="Buscar por nome..." aria-label="Buscar por nome">
+        <label class="option" for="filter-student">
+          <input type="checkbox" id="filter-student">
+          Só estudantes
+        </label>
+      </div>
+
+      <!-- Carregando, lista vazia, erro e sucesso aparecem aqui (role="status" faz o leitor de tela anunciar) -->
+      <p id="status-message" class="message" role="status">Carregando membros...</p>
+
+      <!-- O club.js cria um <article class="card"> por membro aqui dentro -->
+      <div id="member-list" class="grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 CineMais - Projeto Integrador de Desenvolvimento Web.</p>
+  </footer>
+</body>
+</html>
