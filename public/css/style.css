@@ -66,10 +66,6 @@ main p a:visited {
   padding: 0 1.5rem;
 }
 
-.hidden {
-  display: none;
-}
-
 /* ========== 3. CABEÇALHO E MENU (Flexbox) ========== */
 .site-header {
   position: sticky;
@@ -356,4 +352,10 @@ input[type="checkbox"] {
   .grid {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+
+/* ========== 11. UTILITÁRIA ========== */
+/* Fica por último para vencer regras como .button (mesma especificidade: a última vence) */
+.hidden {
+  display: none;
 }
