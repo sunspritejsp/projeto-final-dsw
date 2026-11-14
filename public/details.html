@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineMais - Duna</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <a href="index.html" class="logo">Cine<span>Mais</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Início</a></li>
+        <li><a href="movies.html" class="nav-link">Em Cartaz</a></li>
+        <li><a href="details.html" class="nav-link active">Detalhes</a></li>
+        <li><a href="club.html" class="nav-link">Clube</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Pôster ao lado das informações principais (Grid) -->
+    <section class="details">
+      <img src="images/duna.png" alt="Pôster de Duna">
+      <div>
+        <h1 class="section-title">Duna</h1>
+        <p class="card-meta">Ficção Científica · 2h35 · 2021 · 14 anos · IMAX 3D</p>
+        <p class="text">Em um futuro distante, o jovem Paul Atreides precisa viajar para Arrakis, o planeta mais perigoso do universo e a única fonte da especiaria, a substância mais valiosa que existe. Enquanto forças rivais lutam pelo controle do planeta, Paul descobre que tem um destino maior do que imaginava.</p>
+        <a href="#sessions" class="button">Ver sessões</a>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Ficha Técnica</h2>
+      <!-- Lista de definições: dt = o que é, dd = o valor -->
+      <dl>
+        <dt>Direção</dt>
+        <dd>Denis Villeneuve</dd>
+        <dt>Roteiro</dt>
+        <dd>Jon Spaihts, Denis Villeneuve e Eric Roth</dd>
+        <dt>Elenco principal</dt>
+        <dd>Timothée Chalamet, Rebecca Ferguson, Oscar Isaac e Zendaya</dd>
+        <dt>Trilha sonora</dt>
+        <dd>Hans Zimmer</dd>
+        <dt>Distribuidora</dt>
+        <dd>Warner Bros. Pictures</dd>
+      </dl>
+    </section>
+
+    <!-- Destino do link por âncora "Ver sessões" -->
+    <section id="sessions">
+      <h2 class="section-title">Sessões</h2>
+      <h3>Sala 1 - IMAX (dublado)</h3>
+      <p class="text">14h00 · 17h30 · 21h00</p>
+      <h3>Sala 3 - VIP (legendado)</h3>
+      <p class="text">15h15 · 18h45 · 22h15</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <address>Contato: (82) 4022-8922 · Rua Super Nintendo, Sen. Nilo Coelho, Arapiraca - AL</address>
+    <p>&copy; 2026 CineMais - Projeto Integrador de Desenvolvimento Web.</p>
+  </footer>
+</body>
+</html>
