@@ -16,23 +16,23 @@ app.get('/members', (req, res) => {
     res.status(200).json(members);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ erro: 'Erro interno ao consultar membros.' });
+    res.status(500).json({ error: 'Erro interno ao consultar membros.' });
   }
 });
 
-// rota de delete (sem proteção contra SQL injection, conforme solicitado)
+// rota de delete
 app.delete('/members/:id', (req, res) => {
   try {
     const id = req.params.id;
-    const info = db.prepare('DELETE FROM members WHERE id = ' + id).run();
+    const info = db.prepare('DELETE FROM members WHERE id = ?').run(id);
 
     if (info.changes === 0) {
-      return res.status(404).json({ erro: 'Membro não encontrado.' });
+      return res.status(404).json({ error: 'Membro não encontrado.' });
     }
     res.status(204).send();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ erro: 'Erro interno ao excluir membro.' });
+    res.status(500).json({ error: 'Erro interno ao excluir membro.' });
   }
 });
 
