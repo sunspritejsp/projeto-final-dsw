@@ -96,6 +96,3 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-
-console.log(validateMember({ name: 'Ana', email: 'ana@email.com', birth_date: '20/05/2000' }));
-console.log(validateMember({ name: 'Ana', email: 'ana@email.com', birth_date: '2000-05-20' }));
