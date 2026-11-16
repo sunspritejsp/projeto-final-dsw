@@ -74,10 +74,9 @@ app.get('/members', (req, res) => {
   }
 });
 
-// rota de busca de um membro GET (usada pelo club.js no modo edição)
+// rota de busca de um membro GET
 app.get('/members/:id', (req, res) => {
   try {
-    // .get() porque é uma linha só; devolve undefined se o id não existe
     const member = db.prepare('SELECT * FROM members WHERE id = ?').get(req.params.id);
 
     if (!member) {
@@ -98,7 +97,7 @@ app.post('/members', (req, res) =>{
     }
 
     try{
-        const insert = db.prepare(`INSERT INTO members(name, email, birth_date, plan,
+        const info = db.prepare(`INSERT INTO members(name, email, birth_date, plan,
          student, zip_code, street,
          house_number, city, state, address_details) VALUES (?,?,?,?,?,?,?,?,?,?,
          ?)`).run(
@@ -106,7 +105,8 @@ app.post('/members', (req, res) =>{
             req.body.student ? 1 : 0, req.body.zip_code, req.body.street, req.body.house_number, req.body.city,
             req.body.state, req.body.address_details
             );
-        res.status(201).json(insert);
+        const member = db.prepare('SELECT * FROM members WHERE id = ?').get(info.lastInsertRowid);
+        res.status(201).json(member);
     }
     catch(error){
         console.error(error);
@@ -116,15 +116,12 @@ app.post('/members', (req, res) =>{
 
 // rota de edição PUT
 app.put('/members/:id', (req, res) => {
-  // igual ao POST: dado inválido → 400
   const error = validateMember(req.body);
   if (error) {
     return res.status(400).json({ error });
   }
 
   try {
-    // cada coluna recebe um ?; o último ? é o id do WHERE.
-    // id e registration_date não mudam
     const info = db.prepare(`UPDATE members SET
       name = ?, email = ?, birth_date = ?, plan = ?, student = ?, zip_code = ?,
       street = ?, house_number = ?, city = ?, state = ?, address_details = ?
@@ -135,12 +132,10 @@ app.put('/members/:id', (req, res) => {
       req.params.id
     );
 
-    // igual ao DELETE: nenhuma linha alterada → o id não existe
     if (info.changes === 0) {
       return res.status(404).json({ error: 'Membro não encontrado.' });
     }
 
-    // lê de volta para responder com o membro como ficou no banco
     const member = db.prepare('SELECT * FROM members WHERE id = ?').get(req.params.id);
     res.status(200).json(member);
   } catch (error) {
@@ -165,7 +160,7 @@ app.delete('/members/:id', (req, res) => {
   }
 });
 
-// inicia o servidor 
+// inicia o server
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
