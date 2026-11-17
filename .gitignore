@@ -6,3 +6,5 @@ node_modules/
 NOTAS.md
 CLAUDE.md
 .claude/
+.playwright-mcp/
+conversa-dsw/
