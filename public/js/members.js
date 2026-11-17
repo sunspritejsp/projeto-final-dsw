@@ -71,7 +71,7 @@ function renderMembers() {
     meta.className = 'card-meta';
 
     const planText = m.student === 1 ? `Pipoca ${m.plan} · Estudante` : `Pipoca ${m.plan}`;
-    const formattedDate = new Date(m.registration_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    const formattedDate = new Date(m.registration_date.replace(' ', 'T')).toLocaleDateString('pt-BR');
 
     const lines = [
       planText,
